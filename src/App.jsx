@@ -4,7 +4,9 @@ import RoadmapView from './components/RoadmapView';
 import AdminView from './components/AdminView';
 import NewRequestForm from './components/NewRequestForm';
 import VibeCodingView from './components/VibeCodingView';
-import { Moon, Sun, Plus, Bot } from 'lucide-react';
+import AuthGate from './components/AuthGate';
+import { Moon, Sun, Plus, Bot, LogOut } from 'lucide-react';
+import { signOut } from './auth/cognito';
 import { AuditProvider, useAuditLog } from './context/AuditContext';
 
 import LogoLight from './assets/Power by SIGMA - white letters.svg';
@@ -58,7 +60,7 @@ const addBusinessDays = (dateStr, daysToAdd) => {
   return d.toISOString().split('T')[0];
 };
 
-function AppContent() {
+function AppContent({ currentUser }) {
   const [darkMode, setDarkMode] = useState(true);
   const [currentView, setCurrentView] = useState('roadmap');
   const [tickets, setTickets] = useState(INITIAL_TICKETS);
@@ -133,6 +135,22 @@ function AppContent() {
             <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ml-2 border border-gray-200 dark:border-gray-600">
               {darkMode ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-gray-600" />}
             </button>
+
+            <div className="ml-2 flex items-center gap-3 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs dark:border-gray-600 dark:bg-gray-700/50">
+              <div className="leading-tight">
+                <div className="font-semibold text-gray-800 dark:text-gray-100">{currentUser.name}</div>
+                <div className="text-gray-500 dark:text-gray-300">{currentUser.email}</div>
+              </div>
+              <button
+                onClick={() => {
+                  signOut();
+                  window.location.reload();
+                }}
+                className="inline-flex items-center gap-1 rounded-full border border-gray-200 px-2 py-1 text-gray-600 transition hover:bg-white hover:text-gray-900 dark:border-gray-500 dark:text-gray-200 dark:hover:bg-gray-600"
+              >
+                <LogOut size={13} /> Sign out
+              </button>
+            </div>
           </nav>
         </header>
 
@@ -159,4 +177,12 @@ function AppContent() {
   );
 }
 
-export default function App() { return <AuditProvider><AppContent /></AuditProvider>; }
+export default function App() {
+  return (
+    <AuditProvider>
+      <AuthGate>
+        {(currentUser) => <AppContent currentUser={currentUser} />}
+      </AuthGate>
+    </AuditProvider>
+  );
+}
