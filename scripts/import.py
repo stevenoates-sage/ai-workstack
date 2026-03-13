@@ -10,9 +10,9 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 os.environ['AWS_CA_BUNDLE'] = '' 
 
 # --- Configuration ---
-TABLE_NAME = "sigma-workstack-requests"
+TABLE_NAME = "ai-workstack-requests"
 REGION = "us-east-1"
-CSV_FILE_PATH = r"C:\Users\steve.oates\OneDrive - Sage Software, Inc\Documents\06. AI Projects\sigma-workstack\csv files\all_requests_20220202.csv"
+CSV_FILE_PATH = r"C:\Users\steve.oates\OneDrive - Sage Software, Inc\Documents\06. AI Projects\ai-workstack\csv files\all_requests_20220202.csv"
 
 def upload_data():
     # 1. Connect to DynamoDB with verify=False (Bypasses the SSL error)
