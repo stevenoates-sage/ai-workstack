@@ -90,9 +90,7 @@ const RoadmapView = ({ tickets, users, onUpdateTicket, onAddTicket, onRejectTick
   const handlePrevMonth = () => setStartDate(prev => subMonths(prev, 1));
   const handleNextMonth = () => setStartDate(prev => addMonths(prev, 1));
 
-  const newCount = tickets.filter(t => t.Status === 'New Request').length;
-  const pocCount = tickets.filter(t => t.Status === 'POC In Flight').length;
-  const inProgressCount = tickets.filter(t => t.Status === 'In Progress').length;
+  const statusCounts = Object.fromEntries(statusList.map(s => [s, tickets.filter(t => t.Status === s).length]));
 
   const getTicketEnd = (t) => {
     if (t.EndDate) return parseISO(t.EndDate);
@@ -109,9 +107,7 @@ const RoadmapView = ({ tickets, users, onUpdateTicket, onAddTicket, onRejectTick
   let tableTickets = tickets.filter(ticket => {
     if (hideCompleted && ticket.Status === 'Complete') return false;
     if (ticket.Status === 'POC Rejected' || ticket.Status === 'Deleted') return false;
-    if (viewFilter === 'New') return ticket.Status === 'New Request';
-    if (viewFilter === 'POC') return ticket.Status === 'POC In Flight';
-    if (viewFilter === 'In Progress') return ticket.Status === 'In Progress';
+    if (viewFilter !== 'All') return ticket.Status === viewFilter;
     if (roadmapFilterId && ticket.id !== roadmapFilterId) return false;
     return true;
   });
@@ -295,11 +291,18 @@ const RoadmapView = ({ tickets, users, onUpdateTicket, onAddTicket, onRejectTick
           <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800">
             <div className="flex items-center gap-3">
               <h3 className="font-bold text-gray-700 dark:text-gray-200">Request List</h3>
-              <div className="flex bg-white dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 p-0.5">
-                <button onClick={() => setViewFilter('All')} className={`px-3 py-1 text-xs font-medium rounded ${viewFilter === 'All' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'text-gray-500'}`}>All</button>
-                <button onClick={() => setViewFilter('In Progress')} className={`px-3 py-1 text-xs font-medium rounded ${viewFilter === 'In Progress' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'text-gray-500'}`}>In Progress ({inProgressCount})</button>
-                <button onClick={() => setViewFilter('POC')} className={`px-3 py-1 text-xs font-medium rounded ${viewFilter === 'POC' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'text-gray-500'}`}>POC In Flight ({pocCount})</button>
-                <button onClick={() => setViewFilter('New')} className={`px-3 py-1 text-xs font-medium rounded ${viewFilter === 'New' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-200' : 'text-gray-500'}`}>New ({newCount})</button>
+              <div className="flex flex-wrap gap-0.5 bg-white dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 p-0.5">
+                {[
+                  { value: 'All', label: 'All' },
+                  { value: 'New Request', label: `New Request (${statusCounts['New Request'] || 0})` },
+                  { value: 'POC In Flight', label: `POC In Flight (${statusCounts['POC In Flight'] || 0})` },
+                  { value: 'POC Approved', label: `POC Approved (${statusCounts['POC Approved'] || 0})` },
+                  { value: 'Waiting Engineering', label: `Waiting Eng. (${statusCounts['Waiting Engineering'] || 0})` },
+                  { value: 'In Progress', label: `In Progress (${statusCounts['In Progress'] || 0})` },
+                  { value: 'Complete', label: `Complete (${statusCounts['Complete'] || 0})` },
+                ].map(f => (
+                  <button key={f.value} onClick={() => setViewFilter(f.value)} className={`px-2 py-1 text-xs font-medium rounded whitespace-nowrap ${viewFilter === f.value ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'text-gray-500'}`}>{f.label}</button>
+                ))}
               </div>
               {roadmapFilterId && <button onClick={() => { setRoadmapFilterId(null); setSelectedTicket(null); }} className="text-xs text-red-500 hover:underline flex items-center"><X size={12} className="mr-1"/> Clear Roadmap Filter</button>}
             </div>

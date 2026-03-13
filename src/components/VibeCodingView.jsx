@@ -1,5 +1,7 @@
 import React from 'react';
 import { Bot, Lightbulb, Rocket, FileCode2 } from 'lucide-react';
+import QuickStartGuide from '../assets/quick start guide.png';
+import VibeOn from '../assets/vibe on.png';
 
 const SectionCard = ({ icon: Icon, title, children }) => (
   <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm">
@@ -14,6 +16,7 @@ const SectionCard = ({ icon: Icon, title, children }) => (
 const VibeCodingView = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+      <img src={QuickStartGuide} alt="Quick Start Guide" className="w-full rounded-xl object-cover" />
       <div className="rounded-2xl border border-blue-200 dark:border-blue-900 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 p-6">
         <div className="flex items-center gap-3 mb-2">
           <Bot size={24} className="text-blue-700 dark:text-blue-400" />
@@ -24,7 +27,9 @@ const VibeCodingView = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="flex gap-4 items-start">
+        <img src={VibeOn} alt="Vibe On" className="w-72 flex-shrink-0 rounded-xl object-cover" />
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <SectionCard icon={Lightbulb} title="What Is Vibe Coding?">
           <p>
             Vibe coding is rapid prototyping with AI pair-programming. You provide intent and constraints,
@@ -56,6 +61,7 @@ const VibeCodingView = () => {
           <p>Include: coding style, libraries to use, and what to avoid.</p>
           <p>Request: a short test plan before large refactors.</p>
         </SectionCard>
+        </div>
       </div>
     </div>
   );
