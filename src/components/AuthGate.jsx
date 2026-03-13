@@ -101,11 +101,7 @@ export default function AuthGate({ children }) {
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl overflow-hidden rounded-[28px] border border-white/10 bg-slate-950/60 shadow-[0_30px_120px_rgba(15,23,42,0.55)] backdrop-blur">
         <div className="hidden w-[46%] flex-col justify-between border-r border-white/10 bg-white/5 p-10 lg:flex">
           <div className="space-y-10">
-            <img src={LogoLight} alt="Power by SIGMA" className="h-40 w-auto object-contain" />
             <div className="space-y-5">
-              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-cyan-200">
-                Secure Access
-              </div>
               <div>
                 <h1 className="max-w-md text-4xl font-black tracking-tight text-white">GTM AI Innovation Hub</h1>
                 <p className="mt-4 max-w-md text-sm leading-6 text-slate-300">
@@ -113,6 +109,7 @@ export default function AuthGate({ children }) {
                 </p>
               </div>
             </div>
+            <img src={LogoLight} alt="Power by SIGMA" className="h-40 w-auto object-contain" />
           </div>
 
           <div className="grid gap-4">
@@ -130,36 +127,37 @@ export default function AuthGate({ children }) {
         </div>
 
         <div className="flex flex-1 items-center justify-center p-6 sm:p-10">
-          <div className="w-full max-w-md rounded-[24px] border border-white/10 bg-white px-6 py-8 text-slate-900 shadow-2xl sm:px-8">
-            {!authConfig.isConfigured ? (
-              <div className="space-y-4">
-                <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-600">
-                  <AlertCircle size={22} />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold">Cognito is not configured</h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    The frontend is missing the Vite environment variables required for login. Rebuild Amplify after confirming the app has the Cognito environment variables.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="mb-6 space-y-2">
-                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white">
-                    {mode === 'new-password' ? <KeyRound size={22} /> : <LockKeyhole size={22} />}
+          <div className="flex w-full max-w-md flex-col items-center gap-6">
+            <div className="w-full rounded-[24px] border border-white/10 bg-white px-6 py-8 text-slate-900 shadow-2xl sm:px-8">
+              {!authConfig.isConfigured ? (
+                <div className="space-y-4">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-600">
+                    <AlertCircle size={22} />
                   </div>
-                  <h2 className="text-2xl font-bold">
-                    {mode === 'new-password' ? 'Set your new password' : 'Sign in'}
-                  </h2>
-                  <p className="text-sm leading-6 text-slate-600">
-                    {mode === 'new-password'
-                      ? 'This is your first login. Update the temporary password to activate your account.'
-                      : 'Use your Sage email address and temporary password from Cognito.'}
-                  </p>
+                  <div>
+                    <h2 className="text-2xl font-bold">Cognito is not configured</h2>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      The frontend is missing the Vite environment variables required for login. Rebuild Amplify after confirming the app has the Cognito environment variables.
+                    </p>
+                  </div>
                 </div>
+              ) : (
+                <>
+                  <div className="mb-6 space-y-2">
+                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white">
+                      {mode === 'new-password' ? <KeyRound size={22} /> : <LockKeyhole size={22} />}
+                    </div>
+                    <h2 className="text-2xl font-bold">
+                      {mode === 'new-password' ? 'Set your new password' : 'Sign in'}
+                    </h2>
+                    <p className="text-sm leading-6 text-slate-600">
+                      {mode === 'new-password'
+                        ? 'This is your first login. Update the temporary password to activate your account.'
+                        : 'Use your Sage email address and temporary password from Cognito.'}
+                    </p>
+                  </div>
 
-                <form className="space-y-4" onSubmit={handleSubmit}>
+                  <form className="space-y-4" onSubmit={handleSubmit}>
                   {mode === 'sign-in' && (
                     <>
                       <label className="block space-y-1.5">
@@ -218,23 +216,26 @@ export default function AuthGate({ children }) {
                     </>
                   )}
 
-                  {error && (
-                    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                      {error}
-                    </div>
-                  )}
+                    {error && (
+                      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {error}
+                      </div>
+                    )}
 
-                  <button
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                    disabled={isSubmitting}
-                    type="submit"
-                  >
-                    {isSubmitting ? <LoaderCircle className="animate-spin" size={16} /> : mode === 'new-password' ? <ArrowRight size={16} /> : <LogIn size={16} />}
-                    {isSubmitting ? 'Working...' : mode === 'new-password' ? 'Save new password' : 'Sign in'}
-                  </button>
-                </form>
-              </>
-            )}
+                    <button
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      disabled={isSubmitting}
+                      type="submit"
+                    >
+                      {isSubmitting ? <LoaderCircle className="animate-spin" size={16} /> : mode === 'new-password' ? <ArrowRight size={16} /> : <LogIn size={16} />}
+                      {isSubmitting ? 'Working...' : mode === 'new-password' ? 'Save new password' : 'Sign in'}
+                    </button>
+                  </form>
+                </>
+              )}
+            </div>
+
+            <img src={LogoLight} alt="Power by SIGMA" className="h-16 w-auto object-contain" />
           </div>
         </div>
       </div>
