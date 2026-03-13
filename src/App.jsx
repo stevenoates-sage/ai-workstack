@@ -91,7 +91,7 @@ function AppContent() {
 
         <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm dark:bg-gray-800 dark:border-gray-700">
           <div className="flex items-center gap-4">
-            <img src={darkMode ? LogoDark : LogoLight} alt="Power by SIGMA" className="h-10 w-auto object-contain"/>
+            <img src={darkMode ? LogoLight : LogoDark} alt="Power by SIGMA" className="h-10 w-auto object-contain"/>
             <div className="h-8 w-px bg-gray-300 dark:bg-gray-600"></div>
             <h1 className="text-xl font-bold tracking-tight text-gray-800 dark:text-white">AI Workstack</h1>
           </div>
