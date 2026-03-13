@@ -1,28 +1,25 @@
 import React, { useState, useEffect } from 'react';
+import { USERS } from '../App';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import TicketCard from './TicketCard';
-import { Users, Filter, X, Calendar, BarChart3, AlertCircle, Tag, FileText, User, Save, AlertTriangle, ArrowUpCircle, MinusCircle, ArrowDownCircle, Trash2, MessageSquare, Send } from 'lucide-react';
+import { Filter, X, FileText, User, Save, Trash2, MessageSquare, Send } from 'lucide-react';
 
 const columns = {
-  'New': { title: 'New Requests', color: 'border-t-yellow-400' },
-  'Waiting Room': { title: 'Waiting Room', color: 'border-t-gray-400' },
-  'Planned (Discovery)': { title: 'Planned (Discovery)', color: 'border-t-gray-500' },
-  'Planned (Discovery Complete)': { title: 'Planned (Ready)', color: 'border-t-blue-500' },
-  'In Progress': { title: 'In Progress', color: 'border-t-orange-500' },
-  'Complete': { title: 'Complete', color: 'border-t-green-600' }
+    'New Request':          { title: 'New Request',         color: 'border-t-yellow-400' },
+    'POC In Flight':        { title: 'POC In Flight',        color: 'border-t-blue-400' },
+    'POC Approved':         { title: 'POC Approved',         color: 'border-t-emerald-500' },
+    'Waiting Engineering':  { title: 'Waiting Engineering',  color: 'border-t-purple-500' },
+    'In Progress':          { title: 'In Progress',          color: 'border-t-orange-500' },
+    'Complete':             { title: 'Complete',             color: 'border-t-green-600' },
 };
 
-const teams = ['Data Development', 'Reporting & Analytics', 'GTM Productivity', 'Planning', 'Operational Program Delivery', 'GTM Performance', 'In-Life'];
 const statusList = Object.keys(columns);
 const tShirtSizes = ['S', 'M', 'L', 'XL'];
 const PRIORITIES = ['Critical', 'High', 'Medium', 'Low', 'Unprioritised'];
 
-const KanbanBoard = ({ tickets, users, onUpdateTicket, onRejectTicket, onDeleteTicket }) => { 
-  const [selectedTeam, setSelectedTeam] = useState('Data Development');
-  const [selectedPerson, setSelectedPerson] = useState(null);
-  
-  const peopleInTeam = users ? [...new Set(users.filter(u => u.Team === selectedTeam).map(u => u.Name))] : [];
-  const allPeople = users ? ['Unassigned', ...users.map(u => u.Name)] : ['Unassigned'];
+const KanbanBoard = ({ tickets, onUpdateTicket, onRejectTicket, onDeleteTicket }) => {
+    const [selectedPerson, setSelectedPerson] = useState(null);
+    const allPeople = ['Unassigned', ...USERS];
   
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -76,12 +73,11 @@ const KanbanBoard = ({ tickets, users, onUpdateTicket, onRejectTicket, onDeleteT
     }
   };
 
-  const filteredTickets = tickets.filter(ticket => {
-    const matchTeam = ticket.Team === selectedTeam;
-    const matchPerson = selectedPerson ? ticket.AssignedTo === selectedPerson : true;
-    const notRejected = ticket.Status !== 'Rejected' && ticket.Status !== 'Deleted';
-    return matchTeam && matchPerson && notRejected;
-  });
+    const filteredTickets = tickets.filter(ticket => {
+        const matchPerson = selectedPerson ? ticket.AssignedTo === selectedPerson : true;
+        const notArchived = ticket.Status !== 'POC Rejected' && ticket.Status !== 'Deleted';
+        return matchPerson && notArchived;
+    });
 
   const getTicketsByStatus = (status) => filteredTickets.filter(t => t.Status === status);
 
@@ -89,18 +85,13 @@ const KanbanBoard = ({ tickets, users, onUpdateTicket, onRejectTicket, onDeleteT
     <div className="flex h-full relative">
         <div className="flex-1 flex flex-col h-full p-6 overflow-hidden">
             {/* Filter Bar */}
-            <div className="mb-6 space-y-4">
-                <div className="flex p-1 bg-gray-200 dark:bg-gray-800 rounded-lg w-fit overflow-x-auto max-w-full">
-                {teams.map(team => (
-                    <button key={team} onClick={() => { setSelectedTeam(team); setSelectedPerson(null); }} className={`px-4 py-2 text-sm font-medium rounded-md whitespace-nowrap transition-all ${selectedTeam === team ? 'bg-white text-blue-600 shadow-sm dark:bg-gray-700 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>{team}</button>
-                ))}
-                </div>
+            <div className="mb-6">
                 <div className="flex items-center gap-3 overflow-x-auto pb-2">
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1 flex-shrink-0"><Filter size={12} /> Filter by:</span>
-                <button onClick={() => setSelectedPerson(null)} className={`px-3 py-1 rounded-full text-xs font-medium border flex-shrink-0 transition-colors ${!selectedPerson ? 'bg-blue-600 text-white border-blue-600' : 'bg-transparent text-gray-500 border-gray-300 dark:text-gray-400 dark:border-gray-600'}`}>All Team</button>
-                {peopleInTeam.map(person => (
-                    <button key={person} onClick={() => setSelectedPerson(person === selectedPerson ? null : person)} className={`px-3 py-1 rounded-full text-xs font-medium border flex-shrink-0 transition-colors flex items-center gap-1 ${selectedPerson === person ? 'bg-blue-600 text-white border-blue-600' : 'bg-transparent text-gray-500 border-gray-300 dark:text-gray-400 dark:border-gray-600'}`}>
-                    <Users size={12} /> {person}
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1 flex-shrink-0"><Filter size={12} /> Assignee:</span>
+                <button onClick={() => setSelectedPerson(null)} className={`px-3 py-1 rounded-full text-xs font-medium border flex-shrink-0 transition-colors ${!selectedPerson ? 'bg-blue-600 text-white border-blue-600' : 'bg-transparent text-gray-500 border-gray-300 dark:text-gray-400 dark:border-gray-600'}`}>All</button>
+                {USERS.map(person => (
+                    <button key={person} onClick={() => setSelectedPerson(person === selectedPerson ? null : person)} className={`px-3 py-1 rounded-full text-xs font-medium border flex-shrink-0 transition-colors ${selectedPerson === person ? 'bg-blue-600 text-white border-blue-600' : 'bg-transparent text-gray-500 border-gray-300 dark:text-gray-400 dark:border-gray-600'}`}>
+                    {person}
                     </button>
                 ))}
                 </div>
@@ -130,16 +121,6 @@ const KanbanBoard = ({ tickets, users, onUpdateTicket, onRejectTicket, onDeleteT
                 </div>
             </DragDropContext>
 
-            {/* Priority Key Footer */}
-            <div className="mt-auto p-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-start gap-4 text-xs text-gray-500 dark:text-gray-400 rounded-b-lg">
-                <span className="font-bold uppercase tracking-wider text-[10px]">Priority Key:</span>
-                <div className="flex gap-4">
-                    <span className="flex items-center gap-1"><AlertTriangle size={12} className="text-red-500" /> Critical</span>
-                    <span className="flex items-center gap-1"><ArrowUpCircle size={12} className="text-orange-500" /> High</span>
-                    <span className="flex items-center gap-1"><MinusCircle size={12} className="text-yellow-500" /> Medium</span>
-                    <span className="flex items-center gap-1"><ArrowDownCircle size={12} className="text-green-500" /> Low</span>
-                </div>
-            </div>
         </div>
 
         {/* DETAIL VIEW SLIDE-OVER */}
@@ -171,12 +152,11 @@ const KanbanBoard = ({ tickets, users, onUpdateTicket, onRejectTicket, onDeleteT
                                 <div><label className="block text-[10px] text-gray-500 mb-1">End Date</label><input type="date" disabled={!isEditing} value={editValues.EndDate} onChange={(e) => setEditValues({...editValues, EndDate: e.target.value})} className={`w-full text-sm p-1.5 rounded border ${isEditing ? 'border-blue-500 bg-white text-gray-900' : 'border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200'}`} /></div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
-                                <div><label className="block text-[10px] text-gray-500 mb-1">Alloc %</label><input type="number" min="0" max="100" step="5" disabled={!isEditing} value={editValues.Capacity} onChange={(e) => setEditValues({...editValues, Capacity: e.target.value})} className={`w-full text-sm p-1.5 rounded border ${isEditing ? 'border-blue-500 bg-white text-gray-900' : 'border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200'}`} /></div>
-                                <div><label className="block text-[10px] text-gray-500 mb-1">Assigned To</label><select disabled={!isEditing} value={editValues.AssignedTo} onChange={(e) => setEditValues({...editValues, AssignedTo: e.target.value})} className={`w-full text-sm p-1.5 rounded border ${isEditing ? 'border-blue-500 bg-white text-gray-900' : 'border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200'}`}><option value="Unassigned">Unassigned</option>{allPeople.filter(p => p !== 'Unassigned').map(p => <option key={p} value={p}>{p}</option>)}</select></div>
-                            </div>
-                            <div className="grid grid-cols-3 gap-4">
-                                <div><label className="block text-[10px] text-gray-500 mb-1">Status</label><select disabled={!isEditing} value={editValues.Status} onChange={(e) => setEditValues({...editValues, Status: e.target.value})} className={`w-full text-sm p-1.5 rounded border ${isEditing ? 'border-blue-500 bg-white text-gray-900' : 'border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200'}`}>{statusList.map(s => <option key={s} value={s}>{s}</option>)}</select></div>
+                                <div><label className="block text-[10px] text-gray-500 mb-1">Assigned To</label><select disabled={!isEditing} value={editValues.AssignedTo} onChange={(e) => setEditValues({...editValues, AssignedTo: e.target.value})} className={`w-full text-sm p-1.5 rounded border ${isEditing ? 'border-blue-500 bg-white text-gray-900' : 'border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200'}`}>{allPeople.map(p => <option key={p} value={p}>{p}</option>)}</select></div>
                                 <div><label className="block text-[10px] text-gray-500 mb-1">T-Shirt</label><select disabled={!isEditing} value={editValues.TShirt} onChange={(e) => setEditValues({...editValues, TShirt: e.target.value})} className={`w-full text-sm p-1.5 rounded border ${isEditing ? 'border-blue-500 bg-white text-gray-900' : 'border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200'}`}>{tShirtSizes.map(s => <option key={s} value={s}>{s}</option>)}</select></div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div><label className="block text-[10px] text-gray-500 mb-1">Status</label><select disabled={!isEditing} value={editValues.Status} onChange={(e) => setEditValues({...editValues, Status: e.target.value})} className={`w-full text-sm p-1.5 rounded border ${isEditing ? 'border-blue-500 bg-white text-gray-900' : 'border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200'}`}>{statusList.map(s => <option key={s} value={s}>{s}</option>)}</select></div>
                                 <div><label className="block text-[10px] text-gray-500 mb-1">Priority</label><select disabled={!isEditing} value={editValues.Priority} onChange={(e) => setEditValues({...editValues, Priority: e.target.value})} className={`w-full text-sm p-1.5 rounded border ${isEditing ? 'border-blue-500 bg-white text-gray-900' : 'border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200'}`}>{PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}</select></div>
                             </div>
                         </div>
@@ -230,13 +210,8 @@ const KanbanBoard = ({ tickets, users, onUpdateTicket, onRejectTicket, onDeleteT
                     <div><h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2 flex items-center gap-1"><FileText size={12}/> Description</h4><div className="p-3 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{selectedTicket.Description || "No description provided."}</div></div>
                     <div className="grid grid-cols-2 gap-6"><div><h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1 flex items-center gap-1"><User size={12}/> Raised By</h4><p className="text-sm dark:text-gray-200">{selectedTicket.RaisedBy || 'Unknown'}</p></div></div>
                     
-                    {/* REJECT BUTTON */}
-                    {['New', 'Waiting Room', 'Proposed'].includes(selectedTicket.Status) && (
-                        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700"><button onClick={() => { const reason = prompt("Please enter a reason for rejection:"); if (reason) { onRejectTicket(selectedTicket.id, reason); setSelectedTicket(null); } }} className="w-full py-2 bg-red-50 text-red-600 border border-red-200 rounded hover:bg-red-100 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800 text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2"><Trash2 size={14} /> Reject Request</button></div>
-                    )}
-                    {/* DELETE BUTTON */}
-                    {['PTO / Public Holiday', 'BAU'].includes(selectedTicket.Status) && (
-                        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700"><button onClick={() => { const reason = prompt("Please enter a reason for deleting this entry:"); if (reason) { onDeleteTicket(selectedTicket.id, reason); setSelectedTicket(null); } }} className="w-full py-2 bg-red-50 text-red-600 border border-red-200 rounded hover:bg-red-100 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800 text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2"><Trash2 size={14} /> Delete Entry</button></div>
+                    {['New Request', 'POC In Flight'].includes(selectedTicket.Status) && (
+                        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700"><button onClick={() => { const reason = prompt("Please enter a reason for rejection:"); if (reason) { onRejectTicket(selectedTicket.id, reason); setSelectedTicket(null); } }} className="w-full py-2 bg-red-50 text-red-600 border border-red-200 rounded hover:bg-red-100 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800 text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2"><Trash2 size={14} /> Reject POC</button></div>
                     )}
                 </div>
              </div>

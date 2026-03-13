@@ -1,89 +1,68 @@
-import React, { useState, useEffect } from 'react';
-import { Save, X, AlertCircle, HelpCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Save, AlertCircle, HelpCircle } from 'lucide-react';
+import { USERS } from '../App';
 
-const TEAMS = ['Data Development', 'Reporting & Analytics', 'GTM Productivity', 'Planning', 'Operational Program Delivery', 'GTM Performance'];
 const T_SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL'];
 
 const NewRequestForm = ({ onSave, onCancel, tickets }) => {
-  // State for Tooltip visibility
-  const [showTooltip, setShowTooltip] = useState(false);
+    const [showTooltip, setShowTooltip] = useState(false);
+    const [formData, setFormData] = useState({
+        Title: '',
+        RaisedBy: USERS[0],
+        Description: '',
+        BusinessValue: '',
+        TShirt: 'M'
+    });
 
-  const [formData, setFormData] = useState({
-    Title: '',
-    Team: 'Data Development',
-    RaisedBy: 'Steve Oates', // Default as requested
-    Description: '',
-    BusinessValue: '',
-    TShirt: 'M'
-  });
+    const generateNextRef = () => {
+        const existingRefs = tickets
+            .map(t => t.Ref || '')
+            .filter(ref => /^AI-\d+$/i.test(ref))
+            .map(ref => parseInt(ref.replace(/AI-/i, ''), 10))
+            .filter(num => !isNaN(num));
 
-  // Helper to generate the next ID based on the selected team
-  const generateNextRef = (teamName) => {
-    const prefix = teamName === 'Data Development' ? 'DD' : 'RA';
-    
-    // Find all existing tickets with this prefix
-    const existingRefs = tickets
-        .filter(t => t.Ref.startsWith(prefix))
-        .map(t => {
-            // Remove prefix and convert to integer
-            const num = parseInt(t.Ref.replace(prefix, ''), 10);
-            return isNaN(num) ? 0 : num;
-        });
-
-    // Find max and add 1 (Default to 1 if none exist)
-    const nextNum = existingRefs.length > 0 ? Math.max(...existingRefs) + 1 : 1;
-    
-    return `${prefix}${nextNum}`;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    const newTicket = {
-        Ref: generateNextRef(formData.Team), // Generate Ref on submit
-        ...formData,
-        Status: 'New',
-        Priority: 'Unprioritised',
-        Capacity: 0,
-        StartDate: '',
-        EndDate: '',
-        AssignedTo: 'Unassigned',
-        DateAdded: new Date().toISOString().split('T')[0] // YYYY-MM-DD
+        const nextNum = existingRefs.length > 0 ? Math.max(...existingRefs) + 1 : 1;
+        return `AI-${String(nextNum).padStart(3, '0')}`;
     };
 
-    onSave(newTicket);
-  };
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        const newTicket = {
+            Ref: generateNextRef(),
+            ...formData,
+            Status: 'New Request',
+            Priority: 'Unprioritised',
+            Capacity: 0,
+            StartDate: '',
+            EndDate: '',
+            AssignedTo: 'Unassigned',
+            DateAdded: new Date().toISOString().split('T')[0]
+        };
+
+        onSave(newTicket);
+    };
 
   return (
     <div className="max-w-3xl mx-auto mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
       <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-        <h2 className="text-xl font-bold text-gray-800 dark:text-white">Create New Request</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Submit a new item to the workstack for triage.</p>
+        <h2 className="text-xl font-bold text-gray-800 dark:text-white">Submit AI POC Request</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Capture a new AI use case for triage and POC planning.</p>
       </div>
       
       <form onSubmit={handleSubmit} className="p-8 space-y-6">
         
         {/* Row 1 */}
         <div className="grid grid-cols-2 gap-6">
-            <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+            <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">POC Title</label>
                 <input 
                     type="text" required 
                     className="w-full p-2.5 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="e.g. Sales Dashboard Update"
+                    placeholder="e.g. AI-powered call analyser for BANT detection"
                     value={formData.Title}
                     onChange={e => setFormData({...formData, Title: e.target.value})}
                 />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Team</label>
-                <select 
-                    className="w-full p-2.5 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                    value={formData.Team}
-                    onChange={e => setFormData({...formData, Team: e.target.value})}
-                >
-                    {TEAMS.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
             </div>
         </div>
 
@@ -91,12 +70,13 @@ const NewRequestForm = ({ onSave, onCancel, tickets }) => {
         <div className="grid grid-cols-2 gap-6">
             <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Raised By</label>
-                <input 
-                    type="text" required 
+                <select
                     className="w-full p-2.5 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
                     value={formData.RaisedBy}
                     onChange={e => setFormData({...formData, RaisedBy: e.target.value})}
-                />
+                >
+                    {USERS.map(user => <option key={user} value={user}>{user}</option>)}
+                </select>
             </div>
             
             {/* T-SHIRT SIZE WITH TOOLTIP */}
@@ -144,7 +124,7 @@ const NewRequestForm = ({ onSave, onCancel, tickets }) => {
             <textarea 
                 rows="4" required
                 className="w-full p-2.5 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-                placeholder="Describe the requirement in detail..."
+                placeholder="Describe the problem, target users, and the AI-assisted approach..."
                 value={formData.Description}
                 onChange={e => setFormData({...formData, Description: e.target.value})}
             />
@@ -156,7 +136,7 @@ const NewRequestForm = ({ onSave, onCancel, tickets }) => {
             <textarea 
                 rows="2" required
                 className="w-full p-2.5 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-                placeholder="What is the benefit? e.g. Saves 4 hours per week."
+                placeholder="What value should this deliver? e.g. reduce handling time by 20%"
                 value={formData.BusinessValue}
                 onChange={e => setFormData({...formData, BusinessValue: e.target.value})}
             />
@@ -165,7 +145,7 @@ const NewRequestForm = ({ onSave, onCancel, tickets }) => {
         {/* Priority Notice */}
         <div className="flex items-center gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 rounded-md text-sm border border-yellow-200 dark:border-yellow-800">
             <AlertCircle size={16} />
-            <span>New requests are set to <strong>'New'</strong> status and <strong>'Unprioritised'</strong> by default.</span>
+            <span>New requests are set to <strong>'New Request'</strong> status and <strong>'Unprioritised'</strong> by default.</span>
         </div>
 
         {/* Buttons */}
