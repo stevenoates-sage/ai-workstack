@@ -7,8 +7,8 @@ import VibeCodingView from './components/VibeCodingView';
 import { Moon, Sun, Plus, Bot } from 'lucide-react';
 import { AuditProvider, useAuditLog } from './context/AuditContext';
 
-import LogoDark from './assets/SIGMA Logo white no background.png';
-import LogoLight from './assets/SIGMA Logo No Background.png';
+import LogoLight from './assets/Power by SIGMA - white letters.svg';
+import LogoDark from './assets/Power by SIGMA v2 - black letters.svg';
 
 export const USERS = ['Steve', 'Chris', 'Dav', 'Pearl', 'Krish'];
 
@@ -91,7 +91,7 @@ function AppContent() {
 
         <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm dark:bg-gray-800 dark:border-gray-700">
           <div className="flex items-center gap-4">
-            <img src={darkMode ? LogoDark : LogoLight} alt="Logo" className="h-10 w-auto object-contain"/>
+            <img src={darkMode ? LogoDark : LogoLight} alt="Power by SIGMA" className="h-10 w-auto object-contain"/>
             <div className="h-8 w-px bg-gray-300 dark:bg-gray-600"></div>
             <h1 className="text-xl font-bold tracking-tight text-gray-800 dark:text-white">AI Workstack</h1>
           </div>
@@ -136,11 +136,5 @@ function AppContent() {
     </div>
   );
 }
-
-export default function App() { return <AuditProvider><AppContent /></AuditProvider>; }
-    const [type, setType] = useState('Data Issue');
-    const [reportName, setReportName] = useState('');
-    const [reportLink, setReportLink] = useState('');
-    const [details, setDetails] = useState('');
 
 export default function App() { return <AuditProvider><AppContent /></AuditProvider>; }
