@@ -99,7 +99,9 @@ export const signIn = (username, password) =>
       onFailure: (error) => reject(error),
       newPasswordRequired: (userAttributes) => {
         const sanitized = { ...userAttributes };
+        delete sanitized.email;
         delete sanitized.email_verified;
+        delete sanitized.name;
 
         resolve({
           type: 'new-password-required',
