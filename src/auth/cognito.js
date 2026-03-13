@@ -74,6 +74,7 @@ export const getCurrentSession = () =>
 export const signIn = (username, password) =>
   new Promise((resolve, reject) => {
     const cognitoUser = getCognitoUser(username.trim());
+    cognitoUser.setAuthenticationFlowType('USER_PASSWORD_AUTH');
     const authDetails = new AuthenticationDetails({
       Username: username.trim(),
       Password: password,
