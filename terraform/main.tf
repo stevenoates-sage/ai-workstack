@@ -81,12 +81,12 @@ resource "aws_cognito_user_pool_client" "web" {
 # ──────────────────────────────────────────────────────────────────────────────
 locals {
   users = {
-    "steve" = "Steve Oates"
-    "rory"  = "Rory"
-    "chris" = "Chris"
-    "dav"   = "Dav"
-    "pearl" = "Pearl"
-    "krish" = "Krish"
+    "steve.oates@sage.com" = {
+      name = "Steve Oates"
+    }
+    "rory.howells@sage.com" = {
+      name = "Rory Howells"
+    }
   }
 }
 
@@ -99,7 +99,9 @@ resource "aws_cognito_user" "users" {
   message_action     = "SUPPRESS"
 
   attributes = {
-    name = each.value
+    name           = each.value.name
+    email          = each.key
+    email_verified = "true"
   }
 }
 
