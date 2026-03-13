@@ -125,8 +125,8 @@ export default function AuthGate({ children }) {
           </div>
         </div>
 
-        <div className="flex flex-1 items-center justify-center p-6 sm:p-10">
-          <div className="flex w-full max-w-md flex-col items-center gap-6">
+        <div className="flex flex-1 justify-center p-6 sm:p-10">
+          <div className="flex min-h-full w-full max-w-md flex-col items-center justify-between gap-6">
             <div className="w-full rounded-[24px] border border-white/10 bg-white px-6 py-8 text-slate-900 shadow-2xl sm:px-8">
               {!authConfig.isConfigured ? (
                 <div className="space-y-4">
@@ -234,7 +234,7 @@ export default function AuthGate({ children }) {
               )}
             </div>
 
-            <img src={LogoLight} alt="Power by SIGMA" className="h-64 w-auto object-contain" />
+            <img src={LogoLight} alt="Power by SIGMA" className="mt-auto h-64 w-auto object-contain" />
           </div>
         </div>
       </div>
