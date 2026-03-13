@@ -90,7 +90,7 @@ locals {
   }
 }
 
-resource "aws_cognito_user_pool_user" "users" {
+resource "aws_cognito_user" "users" {
   for_each = local.users
 
   user_pool_id       = aws_cognito_user_pool.main.id
