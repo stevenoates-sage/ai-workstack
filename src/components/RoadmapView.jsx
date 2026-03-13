@@ -100,13 +100,13 @@ const RoadmapView = ({ tickets, users, onUpdateTicket, onAddTicket, onRejectTick
   };
 
   const gridTickets = tickets.filter(ticket => {
-    if (ticket.Status === 'POC Rejected' || ticket.Status === 'Deleted') return false;
+    if (ticket.Status === 'Deleted') return false;
     return true;
   });
 
   let tableTickets = tickets.filter(ticket => {
     if (hideCompleted && ticket.Status === 'Complete') return false;
-    if (ticket.Status === 'POC Rejected' || ticket.Status === 'Deleted') return false;
+    if (ticket.Status === 'Deleted') return false;
     if (viewFilter !== 'All') return ticket.Status === viewFilter;
     if (roadmapFilterId && ticket.id !== roadmapFilterId) return false;
     return true;
@@ -137,7 +137,7 @@ const RoadmapView = ({ tickets, users, onUpdateTicket, onAddTicket, onRejectTick
     const newStart = parseISO(newStartStr);
     const newEnd = newEndStr ? parseISO(newEndStr) : new Date();
     const capacityToAdd = parseInt(newCapacity, 10);
-    const otherTickets = tickets.filter(t => t.AssignedTo === person && t.id !== excludeTicketId && t.StartDate && t.Status !== 'Complete' && t.Status !== 'Rejected' && t.Status !== 'Deleted');
+    const otherTickets = tickets.filter(t => t.AssignedTo === person && t.id !== excludeTicketId && t.StartDate && t.Status !== 'Complete' && t.Status !== 'POC Rejected' && t.Status !== 'Deleted');
     let currentDate = newStart; let maxLoad = 0; let overloadDate = null;
     while (currentDate <= newEnd) {
       if (![0, 6].includes(currentDate.getDay())) {
@@ -297,6 +297,7 @@ const RoadmapView = ({ tickets, users, onUpdateTicket, onAddTicket, onRejectTick
                   { value: 'New Request', label: `New Request (${statusCounts['New Request'] || 0})` },
                   { value: 'POC In Flight', label: `POC In Flight (${statusCounts['POC In Flight'] || 0})` },
                   { value: 'POC Approved', label: `POC Approved (${statusCounts['POC Approved'] || 0})` },
+                  { value: 'POC Rejected', label: `POC Rejected (${statusCounts['POC Rejected'] || 0})` },
                   { value: 'Waiting Engineering', label: `Waiting Eng. (${statusCounts['Waiting Engineering'] || 0})` },
                   { value: 'In Progress', label: `In Progress (${statusCounts['In Progress'] || 0})` },
                   { value: 'Complete', label: `Complete (${statusCounts['Complete'] || 0})` },
