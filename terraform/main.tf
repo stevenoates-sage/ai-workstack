@@ -87,6 +87,12 @@ locals {
     "rory.howells@sage.com" = {
       name = "Rory Howells"
     }
+    "dav.bhamra@sage.com" = {
+      name = "Dav Bhamra"
+    }
+    "dominic.ballinger@sage.com" = {
+      name = "Dominic Ballinger"
+    }
   }
 }
 
