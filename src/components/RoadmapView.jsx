@@ -41,7 +41,7 @@ const Toggle = ({ label, checked, onChange }) => (
 
 const RoadmapView = ({ tickets, users, onUpdateTicket, onAddTicket, onRejectTicket, onDeleteTicket, externalSelectedId, clearExternalSelection }) => {
   const { addLog } = useAuditLog();
-  const [startDate, setStartDate] = useState(new Date('2026-01-01'));
+  const [startDate, setStartDate] = useState(startOfMonth(new Date()));
   const [hideCompleted, setHideCompleted] = useState(false);
   const [viewFilter, setViewFilter] = useState('All');
   const [roadmapFilterId, setRoadmapFilterId] = useState(null);

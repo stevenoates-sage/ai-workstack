@@ -4,6 +4,40 @@ import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import TicketCard from './TicketCard';
 import { Filter, X, FileText, User, Save, Trash2, MessageSquare, Send } from 'lucide-react';
 
+const FLOW_STEPS = [
+  { label: 'New Request',          color: 'bg-yellow-400',   textColor: 'text-yellow-900', desc: 'Anyone in RevOps submits a new AI idea' },
+  { label: 'POC In Flight',        color: 'bg-blue-500',      textColor: 'text-white',      desc: 'RevOps team explores & builds the proof of concept' },
+  { label: 'POC Approved',         color: 'bg-emerald-500',   textColor: 'text-white',      desc: 'POC showcased — leadership approves for engineering' },
+  { label: 'Waiting Engineering',  color: 'bg-purple-600',    textColor: 'text-white',      desc: 'Data Product Engineering prioritise & plan the build' },
+  { label: 'In Progress',          color: 'bg-orange-500',    textColor: 'text-white',      desc: 'On the roadmap — security, testing & production build' },
+  { label: 'Complete',             color: 'bg-green-600',     textColor: 'text-white',      desc: 'Deployed to production & live for RevOps to use' },
+];
+
+const PipelineFlow = () => (
+  <div className="px-4 pt-3 pb-2 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">AI Innovation Pipeline</p>
+    <div className="flex items-stretch gap-0 overflow-x-auto pb-1">
+      {FLOW_STEPS.map((step, i) => (
+        <div key={step.label} className="flex items-stretch min-w-0 flex-1">
+          <div className="flex flex-col items-center justify-center flex-1 min-w-[120px]">
+            <div className={`w-full ${step.color} ${step.textColor} rounded-md px-2 py-1.5 text-center`}>
+              <div className="text-[10px] font-bold leading-tight whitespace-nowrap">{step.label}</div>
+            </div>
+            <div className="text-[9px] text-gray-400 dark:text-gray-500 text-center mt-1 px-1 leading-tight">{step.desc}</div>
+          </div>
+          {i < FLOW_STEPS.length - 1 && (
+            <div className="flex items-center px-1 flex-shrink-0 pb-4">
+              <svg width="16" height="12" viewBox="0 0 16 12" className="text-gray-300 dark:text-gray-600 flex-shrink-0">
+                <path d="M0 6 H12 M8 2 L14 6 L8 10" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 const columns = {
     'New Request':          { title: 'New Request',         color: 'border-t-yellow-400' },
     'POC In Flight':        { title: 'POC In Flight',        color: 'border-t-blue-400' },
@@ -83,7 +117,9 @@ const KanbanBoard = ({ tickets, onUpdateTicket, onRejectTicket, onDeleteTicket }
 
   return (
     <div className="flex h-full relative">
-        <div className="flex-1 flex flex-col h-full p-6 overflow-hidden">
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
+            <PipelineFlow />
+            <div className="flex-1 flex flex-col p-6 overflow-hidden">
             {/* Filter Bar */}
             <div className="mb-6">
                 <div className="flex items-center gap-3 overflow-x-auto pb-2">
@@ -121,6 +157,7 @@ const KanbanBoard = ({ tickets, onUpdateTicket, onRejectTicket, onDeleteTicket }
                 </div>
             </DragDropContext>
 
+        </div>
         </div>
 
         {/* DETAIL VIEW SLIDE-OVER */}
