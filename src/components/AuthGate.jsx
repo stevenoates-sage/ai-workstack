@@ -109,7 +109,6 @@ export default function AuthGate({ children }) {
                 </p>
               </div>
             </div>
-            <img src={LogoLight} alt="Power by SIGMA" className="h-40 w-auto object-contain" />
           </div>
 
           <div className="grid gap-4">
@@ -235,7 +234,7 @@ export default function AuthGate({ children }) {
               )}
             </div>
 
-            <img src={LogoLight} alt="Power by SIGMA" className="h-16 w-auto object-contain" />
+            <img src={LogoLight} alt="Power by SIGMA" className="h-64 w-auto object-contain" />
           </div>
         </div>
       </div>
