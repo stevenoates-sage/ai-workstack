@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { BookMarked, CalendarClock, CheckCircle2, ChevronDown, ChevronRight, Download, FileText, Table } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookMarked, CalendarClock, CheckCircle2, ChevronDown, ChevronRight, Download, FileText, Table } from 'lucide-react';
 import { LEARNING_GUIDES } from '../data/learningGuides';
 import { getGuideProgress, setGuideProgress } from '../utils/progressStore';
 
@@ -32,6 +32,7 @@ export default function BootcampView({ currentUser }) {
   const [tocLinks, setTocLinks] = useState([]);
   const [expandedSections, setExpandedSections] = useState({});
   const [contentHeight, setContentHeight] = useState(null);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [progress, setProgress] = useState({
     percent: 0,
     anchor: null,
@@ -127,7 +128,9 @@ export default function BootcampView({ currentUser }) {
   };
 
   const findCurrentSection = (doc, scrollTop) => {
-    const anchors = Array.from(doc.querySelectorAll('h1[id], h2[id], h3[id], section[id]'));
+    const anchors = Array.from(doc.querySelectorAll('h1[id], h2[id], h3[id], section[id]')).filter(
+      (node) => node.offsetParent !== null,
+    );
     if (!anchors.length) {
       return { anchor: null };
     }
@@ -139,6 +142,48 @@ export default function BootcampView({ currentUser }) {
 
     const anchor = current.id || null;
     return { anchor };
+  };
+
+  const applyPaginationView = (index) => {
+    const doc = iframeRef.current?.contentDocument;
+    if (!doc || !sectionsRef.current.length) {
+      return;
+    }
+
+    const clamped = Math.max(0, Math.min(index, sectionsRef.current.length - 1));
+
+    sectionsRef.current.forEach((section, idx) => {
+      const node = doc.getElementById(section.anchor);
+      if (!node) return;
+      node.style.display = idx === clamped ? 'block' : 'none';
+    });
+
+    doc.querySelectorAll('hr.divider').forEach((node) => {
+      node.style.display = 'none';
+    });
+  };
+
+  const getSectionIndexByAnchor = (anchor) => {
+    if (!anchor) return -1;
+    return sectionsRef.current.findIndex(
+      (section) => section.anchor === anchor || section.children.some((child) => child.id === anchor),
+    );
+  };
+
+  const goToPage = (index, anchor = null) => {
+    if (!sectionsRef.current.length) {
+      return;
+    }
+
+    const clamped = Math.max(0, Math.min(index, sectionsRef.current.length - 1));
+    const targetAnchor = anchor || sectionsRef.current[clamped]?.anchor || null;
+
+    setCurrentPageIndex(clamped);
+    persistProgress({
+      anchor: targetAnchor,
+      completedSections: completedSectionsRef.current,
+      completedSubsections: completedSubsectionsRef.current,
+    });
   };
 
   const readSidebarLinks = (doc) => {
@@ -446,6 +491,7 @@ export default function BootcampView({ currentUser }) {
     }
 
     const initialPercent = calculatePercent(sectionTree, normalizedSections, normalizedSubsections);
+    const initialIndex = Math.max(0, getSectionIndexByAnchor(existing?.anchor));
     setProgress((prev) => ({
       ...prev,
       percent: initialPercent,
@@ -453,6 +499,7 @@ export default function BootcampView({ currentUser }) {
       completedSubsections: normalizedSubsections,
       anchor: existing?.anchor || prev.anchor,
     }));
+    setCurrentPageIndex(initialIndex);
     progressRef.current = {
       ...progressRef.current,
       percent: initialPercent,
@@ -460,6 +507,7 @@ export default function BootcampView({ currentUser }) {
       completedSubsections: normalizedSubsections,
       anchor: existing?.anchor || progressRef.current.anchor,
     };
+    applyPaginationView(initialIndex);
 
     const onScroll = () => {
       const current = findCurrentSection(doc, win.scrollY);
@@ -500,29 +548,30 @@ export default function BootcampView({ currentUser }) {
   const jumpToAnchor = (anchor) => {
     const iframe = iframeRef.current;
     if (!iframe?.contentDocument || !iframe?.contentWindow) return;
+
+    const idx = getSectionIndexByAnchor(anchor);
+    if (idx >= 0) {
+      goToPage(idx, anchor);
+      window.setTimeout(() => {
+        const target = iframe.contentDocument.getElementById(anchor);
+        if (target) {
+          target.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        }
+      }, 50);
+      return;
+    }
+
     const target = iframe.contentDocument.getElementById(anchor);
-    if (!target) return;
-    target.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    if (target) {
+      target.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }
   };
 
   const handleResume = () => {
-    const iframe = iframeRef.current;
-    if (!iframe?.contentDocument || !iframe?.contentWindow) return;
-
-    if (progress.anchor) {
-      const target = iframe.contentDocument.getElementById(progress.anchor);
-      if (target) {
-        target.scrollIntoView({ block: 'start', behavior: 'smooth' });
-        return;
-      }
+    const idx = getSectionIndexByAnchor(progress.anchor);
+    if (idx >= 0) {
+      goToPage(idx, progress.anchor);
     }
-
-    const maxScroll = Math.max(
-      0,
-      iframe.contentDocument.documentElement.scrollHeight - iframe.contentWindow.innerHeight,
-    );
-    const y = Math.round((progress.percent / 100) * maxScroll);
-    iframe.contentWindow.scrollTo({ top: y, behavior: 'smooth' });
   };
 
   const toggleSectionExpanded = (anchor) => {
@@ -531,6 +580,22 @@ export default function BootcampView({ currentUser }) {
       [anchor]: !prev[anchor],
     }));
   };
+
+  const handlePreviousPage = () => {
+    goToPage(currentPageIndex - 1);
+  };
+
+  const handleNextPage = () => {
+    const current = sectionsRef.current[currentPageIndex];
+    if (!current) return;
+
+    upsertSectionCompletion(current.anchor, true);
+    goToPage(currentPageIndex + 1);
+  };
+
+  useEffect(() => {
+    applyPaginationView(currentPageIndex);
+  }, [currentPageIndex, tocLinks]);
 
   return (
     <div className="h-full overflow-y-auto bg-gray-100 p-6 dark:bg-gray-900">
@@ -683,16 +748,40 @@ export default function BootcampView({ currentUser }) {
 
         <div>
           <section
-            className="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+            className="flex flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-800"
             style={contentHeight ? { height: `${contentHeight}px` } : undefined}
           >
             <iframe
               ref={iframeRef}
-              className="h-full w-full rounded-xl border border-gray-200 bg-white dark:border-gray-600"
+              className="min-h-0 flex-1 w-full rounded-xl border border-gray-200 bg-white dark:border-gray-600"
               src={guide.guideUrl}
               title="AI Analyst Weekend Bootcamp Guide"
               onLoad={attachProgressTracker}
             />
+
+            <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-600 dark:bg-gray-700/40">
+              <button
+                onClick={handlePreviousPage}
+                disabled={currentPageIndex <= 0}
+                className="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-500 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
+                type="button"
+              >
+                <ArrowLeft size={14} /> Previous
+              </button>
+
+              <div className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">
+                Page {Math.min(currentPageIndex + 1, Math.max(1, tocLinks.length))} of {Math.max(1, tocLinks.length)}
+              </div>
+
+              <button
+                onClick={handleNextPage}
+                disabled={currentPageIndex >= tocLinks.length - 1}
+                className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+                type="button"
+              >
+                Next <ArrowRight size={14} />
+              </button>
+            </div>
           </section>
         </div>
       </div>

@@ -6,11 +6,21 @@ import NewRequestForm from './components/NewRequestForm';
 import VibeCodingView from './components/VibeCodingView';
 import BootcampView from './components/BootcampView';
 import MyProgressView from './components/MyProgressView';
+import HomeView from './components/HomeView';
+import ForgeView from './components/ForgeView';
+import ColleseumView from './components/ColleseumView';
 import AuthGate from './components/AuthGate';
-import { Moon, Sun, Plus, Bot, BookOpen, Gauge, LogOut } from 'lucide-react';
+import { Moon, Sun, LogOut } from 'lucide-react';
 import { signOut } from './auth/cognito';
 import { AuditProvider, useAuditLog } from './context/AuditContext';
 
+import HammerIcon from './assets/Icons/Daedalus Hammer Icon.png';
+import OdysseyIcon from './assets/Icons/Odyssey Path Icon.png';
+import AnvilIcon from './assets/Icons/The Anvil Icon.png';
+import ForgeIcon from './assets/Icons/The Forge Icon.png';
+import ColleseumIcon from './assets/Icons/The Colleseum Icon.png';
+import ZeusIcon from './assets/Icons/zeus Icon.png';
+import IdeaButton from './assets/Icons/Idea Button.png';
 import LogoLight from './assets/Power by SIGMA - white letters.svg';
 import LogoDark from './assets/Power by SIGMA v2 - black letters.svg';
 
@@ -64,7 +74,7 @@ const addBusinessDays = (dateStr, daysToAdd) => {
 
 function AppContent({ currentUser }) {
   const [darkMode, setDarkMode] = useState(true);
-  const [currentView, setCurrentView] = useState('roadmap');
+  const [currentView, setCurrentView] = useState('home');
   const [tickets, setTickets] = useState(INITIAL_TICKETS);
   const [adminSelectedTicketId, setAdminSelectedTicketId] = useState(null);
   const { addLog } = useAuditLog();
@@ -115,24 +125,30 @@ function AppContent({ currentUser }) {
     <div className={darkMode ? 'dark' : ''}>
       <div className="h-screen flex flex-col bg-gray-50 text-gray-900 font-sans transition-colors duration-300 dark:bg-gray-900 dark:text-gray-100 relative">
 
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+        <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-10 shadow-sm dark:bg-gray-800 dark:border-gray-700">
           <div className="flex items-center gap-4">
-            <img src={darkMode ? LogoLight : LogoDark} alt="Power by SIGMA" className="h-14 w-auto object-contain"/>
-            <div className="h-8 w-px bg-gray-300 dark:bg-gray-600"></div>
-            <h1 className="text-xl font-bold tracking-tight text-gray-800 dark:text-white">GTM AI Innovation Hub</h1>
+            <img src={HammerIcon} alt="RevOps Hub" className="h-14 w-14 rounded-xl object-contain"/>
+            <div className="h-10 w-px bg-gray-300 dark:bg-gray-600"></div>
+            <h1 className="text-xl font-bold tracking-tight text-gray-800 dark:text-white">RevOps Innovation Hub</h1>
+            <div className="h-10 w-px bg-gray-300 dark:bg-gray-600"></div>
+            <img src={darkMode ? LogoLight : LogoDark} alt="Powered by SIGMA" className="h-10 w-auto object-contain"/>
           </div>
 
-          <nav className="flex items-center gap-6 text-sm font-medium text-gray-600 dark:text-gray-300">
-            <button onClick={() => setCurrentView('roadmap')} className={navItem('roadmap', 'Roadmap')}>Roadmap</button>
-            <button onClick={() => setCurrentView('board')} className={navItem('board', 'Kanban')}>Kanban Board</button>
-            <button onClick={() => setCurrentView('vibe')} className={`transition-colors pb-4 -mb-4 border-b-2 flex items-center gap-1.5 ${currentView === 'vibe' ? 'text-purple-600 border-purple-600 dark:text-purple-400' : 'border-transparent hover:text-purple-600'}`}><Bot size={15} /> Vibe Coding</button>
-            <button onClick={() => setCurrentView('bootcamp')} className={`transition-colors pb-4 -mb-4 border-b-2 flex items-center gap-1.5 ${currentView === 'bootcamp' ? 'text-emerald-600 border-emerald-600 dark:text-emerald-400' : 'border-transparent hover:text-emerald-600'}`}><BookOpen size={15} /> Bootcamp</button>
-            <button onClick={() => setCurrentView('progress')} className={`transition-colors pb-4 -mb-4 border-b-2 flex items-center gap-1.5 ${currentView === 'progress' ? 'text-cyan-600 border-cyan-600 dark:text-cyan-400' : 'border-transparent hover:text-cyan-600'}`}><Gauge size={15} /> My Progress</button>
-            <button onClick={() => setCurrentView('admin')} className={navItem('admin', 'Admin')}>Admin</button>
+          <nav className="flex items-center gap-4 text-xs font-semibold text-gray-600 dark:text-gray-300">
+            <button onClick={() => setCurrentView('home')} className={`transition-colors pb-2 -mb-2 border-b-2 inline-flex items-center gap-1.5 ${currentView === 'home' ? 'text-blue-600 border-blue-600 dark:text-blue-400' : 'border-transparent hover:text-blue-600'}`}><img src={HammerIcon} alt="" className="h-7 w-7 object-contain"/><span>Home</span></button>
+            <button onClick={() => setCurrentView('roadmap')} className={`transition-colors pb-2 -mb-2 border-b-2 inline-flex items-center gap-1.5 ${currentView === 'roadmap' ? 'text-blue-600 border-blue-600 dark:text-blue-400' : 'border-transparent hover:text-blue-600'}`}><img src={OdysseyIcon} alt="" className="h-7 w-7 object-contain"/><span>The Odyssey Path</span></button>
+            <button onClick={() => setCurrentView('board')} className={`transition-colors pb-2 -mb-2 border-b-2 inline-flex items-center gap-1.5 ${currentView === 'board' ? 'text-amber-600 border-amber-600 dark:text-amber-400' : 'border-transparent hover:text-amber-600'}`}><img src={AnvilIcon} alt="" className="h-7 w-7 object-contain"/><span>The Anvil</span></button>
+            <button onClick={() => setCurrentView('forge')} className={`transition-colors pb-2 -mb-2 border-b-2 inline-flex items-center gap-1.5 ${currentView === 'forge' ? 'text-emerald-600 border-emerald-600 dark:text-emerald-400' : 'border-transparent hover:text-emerald-600'}`}><img src={ForgeIcon} alt="" className="h-7 w-7 object-contain"/><span>The Forge</span></button>
+            <button onClick={() => setCurrentView('colleseum')} className={`transition-colors pb-2 -mb-2 border-b-2 inline-flex items-center gap-1.5 ${currentView === 'colleseum' ? 'text-rose-600 border-rose-600 dark:text-rose-400' : 'border-transparent hover:text-rose-600'}`}><img src={ColleseumIcon} alt="" className="h-7 w-7 object-contain"/><span>The Colleseum</span></button>
+            <button onClick={() => setCurrentView('admin')} className={`transition-colors pb-2 -mb-2 border-b-2 inline-flex items-center gap-1.5 ${currentView === 'admin' ? 'text-indigo-600 border-indigo-600 dark:text-indigo-400' : 'border-transparent hover:text-indigo-600'}`}><img src={ZeusIcon} alt="" className="h-7 w-7 object-contain"/><span>Zeus</span></button>
 
             <div className="flex items-center gap-2 ml-4">
-              <button onClick={() => setCurrentView('new-request')} className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm transition-all text-xs font-bold uppercase">
-                <Plus size={14} /> New Request
+              <button
+                type="button"
+                onClick={() => setCurrentView('new-request')}
+                className="rounded-xl border border-gray-200 bg-white p-1 transition hover:border-blue-300 hover:shadow-sm dark:border-gray-600 dark:bg-gray-700"
+              >
+                <img src={IdeaButton} alt="New Request" className="h-8 w-auto object-contain" />
               </button>
             </div>
 
@@ -159,6 +175,7 @@ function AppContent({ currentUser }) {
         </header>
 
         <main className="flex-1 overflow-hidden">
+          {currentView === 'home' && <HomeView onNavigate={setCurrentView} />}
           {currentView === 'board' && <KanbanBoard tickets={tickets} users={USERS} onUpdateTicket={handleUpdateTicket} onRejectTicket={handleRejectTicket} onDeleteTicket={handleDeleteTicket} />}
           {currentView === 'roadmap' && (
             <RoadmapView
@@ -172,11 +189,13 @@ function AppContent({ currentUser }) {
               clearExternalSelection={() => setAdminSelectedTicketId(null)}
             />
           )}
+          {currentView === 'forge' && <ForgeView currentUser={currentUser} onOpenView={setCurrentView} />}
+          {currentView === 'colleseum' && <ColleseumView currentUser={currentUser} />}
+          {currentView === 'admin' && <AdminView tickets={tickets} onJumpToTicket={handleAdminJump} />}
+          {currentView === 'new-request' && <NewRequestForm onSave={addTicket} onCancel={() => setCurrentView('board')} tickets={tickets} />}
           {currentView === 'vibe' && <VibeCodingView />}
           {currentView === 'bootcamp' && <BootcampView currentUser={currentUser} />}
           {currentView === 'progress' && <MyProgressView currentUser={currentUser} onOpenGuide={(route) => setCurrentView(route)} />}
-          {currentView === 'admin' && <AdminView tickets={tickets} onJumpToTicket={handleAdminJump} />}
-          {currentView === 'new-request' && <NewRequestForm onSave={addTicket} onCancel={() => setCurrentView('board')} tickets={tickets} />}
         </main>
       </div>
     </div>

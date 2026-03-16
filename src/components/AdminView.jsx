@@ -23,7 +23,7 @@ const AdminView = ({ tickets, onJumpToTicket }) => {
       <div className="mb-8 flex justify-between items-end">
         <div>
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-            <History className="text-blue-600" /> System Admin & Logs
+                        <History className="text-blue-600" /> Zeus & Logs
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mt-1">Track system changes and manage rejected items.</p>
         </div>

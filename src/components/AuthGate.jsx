@@ -127,7 +127,7 @@ export default function AuthGate({ children }) {
           <div className="space-y-10">
             <div className="space-y-5">
               <div>
-                <h1 className="max-w-md text-4xl font-black tracking-tight text-white">GTM AI Innovation Hub</h1>
+                <h1 className="max-w-md text-4xl font-black tracking-tight text-white">RevOps Innovation Hub</h1>
                 <p className="mt-4 max-w-md text-sm leading-6 text-slate-300">
                   Sign in with your Sage email to review roadmap priorities, feed new requirements, and manage AI delivery work in one place.
                 </p>
