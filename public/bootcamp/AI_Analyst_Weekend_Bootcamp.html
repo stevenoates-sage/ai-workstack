@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build AI Analysts in Claude Code — Weekend Bootcamp v1.0</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap');
+
+  :root {
+    --green:   #00D639;
+    --dark:    #0F1923;
+    --mid:     #1A2A3A;
+    --card:    #1E2D3D;
+    --accent:  #00A550;
+    --grey:    #7A9BB5;
+    --white:   #F0F4F8;
+    --border:  #253545;
+    --sat:     #0D1E2E;
+    --sun:     #0D1E18;
+    --warn-bg: #2A2010;
+    --tip-bg:  #0D2010;
+    --note-bg: #101A28;
+    --code-bg: #080E14;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--dark);
+    color: var(--white);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+
+  /* ── Sidebar nav ── */
+  #sidebar {
+    position: fixed; top: 0; left: 0;
+    width: 240px; height: 100vh;
+    background: var(--mid);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    z-index: 100;
+    padding: 0 0 40px 0;
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #sidebar.collapsed {
+    transform: translateX(-240px);
+  }
+  #sidebar .logo {
+    padding: 20px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--green);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  /* ── Toggle button ── */
+  #sidebar-toggle {
+    position: fixed;
+    top: 14px;
+    left: 248px;
+    z-index: 200;
+    width: 32px; height: 32px;
+    background: var(--mid);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--grey);
+    font-size: 16px;
+    transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+                background 0.15s, color 0.15s;
+    line-height: 1;
+    user-select: none;
+  }
+  #sidebar-toggle:hover {
+    background: var(--card);
+    color: var(--green);
+    border-color: var(--green);
+  }
+  #sidebar-toggle.collapsed {
+    left: 8px;
+  }
+  #sidebar-toggle .tip {
+    position: absolute;
+    left: 40px; top: 50%;
+    transform: translateY(-50%);
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--grey);
+    font-size: 11px; font-weight: 500;
+    white-space: nowrap;
+    padding: 4px 8px;
+    border-radius: 4px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  #sidebar-toggle:hover .tip { opacity: 1; }
+
+  #sidebar nav a {
+    display: block; padding: 7px 16px;
+    color: var(--grey); text-decoration: none;
+    font-size: 12.5px; font-weight: 500;
+    transition: color 0.15s, background 0.15s;
+    border-left: 2px solid transparent;
+  }
+  #sidebar nav a:hover,
+  #sidebar nav a.active {
+    color: var(--white);
+    background: rgba(0,214,57,0.06);
+    border-left-color: var(--green);
+  }
+  #sidebar nav .section-label {
+    padding: 14px 16px 4px;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: #3A5A70;
+  }
+
+  /* ── Main content ── */
+  #main {
+    margin-left: 240px;
+    width: calc(100% - 240px);
+    min-height: 100vh;
+    transition: margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+                width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #main.centred {
+    margin-left: 0;
+    width: 100%;
+  }
+  /* Inner wrapper constrains readable width and centres within the available space */
+  .inner-wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 32px 80px;
+  }
+
+  /* ── Cover ── */
+  #cover {
+    padding: 80px 0 48px;
+    border-bottom: 2px solid var(--green);
+    margin-bottom: 56px;
+  }
+  #cover .eyebrow {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--green); margin-bottom: 16px;
+  }
+  #cover h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 64px; line-height: 1.0;
+    color: var(--white); margin-bottom: 8px;
+  }
+  #cover h1 span { color: var(--green); }
+  #cover .subtitle {
+    font-size: 14px; color: var(--grey);
+    margin-top: 20px; line-height: 1.6;
+  }
+  .day-pills {
+    display: flex; gap: 16px; margin-top: 32px;
+  }
+  .day-pill {
+    flex: 1; padding: 20px;
+    border-radius: 8px; border: 1px solid var(--border);
+  }
+  .day-pill.sat { background: var(--sat); }
+  .day-pill.sun { background: var(--sun); }
+  .day-pill .day-name { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green); }
+  .day-pill .day-time { font-size: 14px; color: var(--white); margin: 4px 0; }
+  .day-pill .day-phase { font-size: 12px; font-weight: 600; color: var(--grey); }
+
+  /* ── Sections ── */
+  .section { margin-bottom: 64px; scroll-margin-top: 24px; }
+
+  /* ── Session banners ── */
+  .session-banner {
+    border-radius: 8px; padding: 24px 28px;
+    margin-bottom: 28px; border: 1px solid var(--border);
+  }
+  .session-banner.sat { background: var(--sat); }
+  .session-banner.sun { background: var(--sun); }
+  .session-banner .phase { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green); }
+  .session-banner h2 { font-size: 26px; color: var(--white); margin: 4px 0; font-weight: 700; }
+  .session-banner .meta { font-size: 13px; color: var(--grey); }
+
+  /* ── Typography ── */
+  h1 { font-size: 32px; font-weight: 700; color: var(--green); margin: 40px 0 16px; }
+  h2 { font-size: 22px; font-weight: 700; color: var(--white); margin: 32px 0 12px; }
+  h3 { font-size: 17px; font-weight: 600; color: #7AC7FF; margin: 24px 0 10px; }
+  p  { margin-bottom: 14px; color: #C8D8E8; font-size: 15px; }
+
+  /* ── Steps ── */
+  .steps {
+    list-style: none;
+    margin: 12px 0 20px;
+    padding: 0;
+  }
+  .steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 11px 0;
+    font-size: 15px;
+    color: #C8D8E8;
+    line-height: 1.65;
+    border-bottom: 1px solid rgba(37,53,69,0.5);
+  }
+  .steps li:last-child { border-bottom: none; }
+  .steps li .num {
+    min-width: 24px; height: 24px;
+    background: var(--green); color: #000;
+    border-radius: 50%; font-weight: 700;
+    font-size: 11px; display: flex;
+    align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 3px;
+  }
+  .steps li .step-body {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .steps li .step-body .code-wrap,
+  .steps li .step-body .code-file {
+    margin-top: 8px;
+    margin-bottom: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .steps li .step-body pre {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  /* ── Inline code pill ── */
+  code.ic {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--green);
+    background: rgba(0, 214, 57, 0.08);
+    border: 1px solid rgba(0, 214, 57, 0.2);
+    border-radius: 4px;
+    padding: 1px 6px;
+    white-space: nowrap;
+  }
+
+  /* ── Bullets ── */
+  ul.buls { margin: 8px 0 16px 20px; }
+  ul.buls li { color: #C8D8E8; font-size: 15px; margin-bottom: 6px; }
+
+  /* ── Code blocks with copy button ── */
+  .code-wrap {
+    overflow: hidden;
+    position: relative;
+    margin: 8px 0 16px;
+  }
+  .code-wrap pre {
+    background: var(--code-bg);
+    border: 1px solid #1A3A2A;
+    border-radius: 6px;
+    padding: 12px 44px 12px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    color: var(--green);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    line-height: 1.5;
+  }
+  .copy-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: #1A3A2A; border: 1px solid #2A5A3A;
+    color: var(--green); border-radius: 4px;
+    width: 28px; height: 28px;
+    cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    font-size: 13px; transition: all 0.15s;
+    z-index: 2;
+  }
+  .copy-btn:hover { background: #2A5A3A; }
+  .copy-btn.copied {
+    background: var(--green); color: #000;
+    border-color: var(--green);
+  }
+  .copy-btn svg { width: 14px; height: 14px; }
+
+  /* ── Multi-line code (CLAUDE.md / skill content) ── */
+  .code-file pre {
+    background: var(--code-bg);
+    border: 1px solid #1A3A2A;
+    border-left: 3px solid var(--green);
+    border-radius: 6px;
+    padding: 16px 44px 16px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px; color: #AAFFAA;
+    overflow-x: auto; line-height: 1.7;
+    white-space: pre;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  /* ── Prompt boxes ── */
+  .prompt-box {
+    background: var(--code-bg);
+    border: 1px solid #2A4A6A;
+    border-left: 3px solid #4A8ABA;
+    border-radius: 6px; padding: 16px 44px 16px 16px;
+    margin: 12px 0 20px; position: relative;
+  }
+  .prompt-box .prompt-label {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: #4A8ABA; margin-bottom: 8px;
+  }
+  .prompt-box .prompt-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; color: #A0C8F0;
+    white-space: pre-wrap;
+  }
+
+  /* ── Block labels (Terminal vs Claude Code) ── */
+  .block-label {
+    display: inline-block;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 3px;
+    margin-bottom: 4px;
+  }
+  .block-label.terminal {
+    background: #1A3A2A; color: var(--green); border: 1px solid #2A5A3A;
+  }
+  .block-label.claude-code {
+    background: #1A2A4A; color: #4A8ABA; border: 1px solid #2A4A6A;
+  }
+
+  /* ── Notes / callouts ── */
+  .callout {
+    border-radius: 6px; padding: 12px 16px;
+    margin: 12px 0 16px; font-size: 14px;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .callout .emoji { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .callout .label { font-weight: 700; margin-right: 4px; }
+  .callout.tip   { background: var(--tip-bg);  border: 1px solid #1A4A2A; color: #A0D8A0; }
+  .callout.warn  { background: var(--warn-bg); border: 1px solid #4A3A10; color: #D8C080; }
+  .callout.info  { background: var(--note-bg); border: 1px solid #2A4A6A; color: #A0C0D8; }
+  .callout.ok    { background: #0A2010;        border: 1px solid #1A5A2A; color: #80D880; }
+
+  /* ── Table overflow wrapper ── */
+  .sched-table, .data-table, .res-table, .git-table {
+    overflow-x: auto;
+    display: block;
+  }
+
+  /* ── Schedule tables ── */
+  .sched-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 16px 0 28px; font-size: 14px; }
+  .sched-table th {
+    background: #0A1520; color: var(--green);
+    padding: 10px 12px; text-align: left;
+    font-weight: 700; font-size: 12px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    border-bottom: 2px solid var(--green);
+  }
+  .sched-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .sched-table tr.alt td { background: rgba(255,255,255,0.02); }
+  .sched-table tr.highlight td { background: rgba(0,214,57,0.05); font-weight: 600; }
+  .sched-table .time { color: var(--green); font-weight: 700; white-space: nowrap; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  .sched-table .note-col { color: var(--grey); font-size: 13px; }
+
+  /* ── Data files table ── */
+  .data-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 16px 0 24px; font-size: 14px; }
+  .data-table th { background: #0A1520; color: var(--green); padding: 10px 12px; text-align: left; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 2px solid var(--green); }
+  .data-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .data-table tr:nth-child(odd) td { background: rgba(255,255,255,0.02); }
+  .data-table .fname { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-weight: 600; font-size: 13px; }
+  .data-table .rows  { color: var(--grey); font-size: 13px; white-space: nowrap; }
+  .data-table .desc  { color: #C8D8E8; font-size: 13px; }
+
+  /* ── Resource tables ── */
+  .res-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 12px 0 24px; font-size: 14px; }
+  .res-table th { background: #0A1520; color: var(--green); padding: 10px 12px; text-align: left; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 2px solid var(--green); }
+  .res-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .res-table tr:nth-child(odd) td { background: rgba(255,255,255,0.02); }
+  .res-table .res-name { color: var(--white); font-weight: 600; font-size: 13.5px; }
+  .res-table a { color: var(--accent); text-decoration: none; font-size: 13px; }
+  .res-table a:hover { text-decoration: underline; color: var(--green); }
+  .res-table .res-desc { color: var(--grey); font-size: 12.5px; margin-top: 2px; }
+
+  /* ── Git reference table ── */
+  .git-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 16px 0 24px; font-size: 14px; }
+  .git-table th { background: #0A1520; color: var(--green); padding: 10px 12px; text-align: left; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 2px solid var(--green); }
+  .git-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .git-table tr:nth-child(odd) td { background: rgba(255,255,255,0.02); }
+  .git-table .cmd { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 12.5px; }
+  .git-table .what { color: #C8D8E8; font-size: 13px; }
+  .git-table .when { color: var(--grey); font-size: 12.5px; }
+
+  /* ── Divider ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+  /* ── Footer ── */
+  footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--border); color: var(--grey); font-size: 12px; }
+
+  /* ── Progress bar ── */
+  #progress { position: fixed; top: 0; left: 240px; right: 0; height: 2px; background: var(--border); z-index: 200; transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1); }
+  #progress-bar { height: 100%; background: var(--green); width: 0; transition: width 0.1s; }
+
+  /* ── Copy toast notification — soft frosted style ── */
+  #copy-toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    background: rgba(22, 34, 48, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 214, 57, 0.25);
+    color: #C8E8D0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    padding: 9px 16px 9px 12px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,214,57,0.08);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transition: opacity 0.2s ease, transform 0.22s ease;
+    white-space: nowrap;
+  }
+  #copy-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  #toast-check {
+    width: 18px; height: 18px;
+    background: rgba(0, 214, 57, 0.15);
+    border: 1px solid rgba(0, 214, 57, 0.3);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 10px;
+    color: var(--green);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    #sidebar { transform: translateX(-240px); }
+    #sidebar.open { transform: translateX(0); }
+    #sidebar-toggle { left: 8px; }
+    #sidebar-toggle.collapsed { left: 8px; }
+    #main { margin-left: 0; width: 100%; }
+    .inner-wrap { padding: 0 20px 60px; }
+    #progress { left: 0; }
+    #cover h1 { font-size: 40px; }
+    .day-pills { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"><div id="progress-bar"></div></div>
+
+<!-- Sidebar toggle button -->
+<button id="sidebar-toggle" title="Toggle navigation" aria-label="Toggle navigation">
+  <span id="toggle-icon">&#9776;</span>
+  <span class="tip" id="toggle-tip">Hide menu</span>
+</button>
+
+<!-- Sidebar -->
+<aside id="sidebar">
+  <div class="logo">AI Analysts Bootcamp</div>
+  <nav>
+    <div class="section-label">Start Here</div>
+    <a href="#prework">Pre-Work</a>
+    <a href="#about">About</a>
+    <a href="#data">Sample Data</a>
+
+    <div class="section-label">Saturday</div>
+    <a href="#sat-schedule">Schedule</a>
+    <a href="#phase1">Phase 1: Foundation</a>
+    <a href="#phase2">Phase 2: Skills</a>
+
+    <div class="section-label">Sunday</div>
+    <a href="#sun-schedule">Schedule</a>
+    <a href="#phase3">Phase 3: Agents</a>
+    <a href="#phase4">Phase 4: Analysis</a>
+    <a href="#phase5">Phase 5: Forward Deployed</a>
+
+    <div class="section-label">Reference</div>
+    <a href="#git-ref">Git Reference &amp; Tutorial</a>
+    <a href="#resources">Resources</a>
+  </nav>
+</aside>
+
+<main id="main">
+<div class="inner-wrap">
+
+<!-- COVER -->
+<section id="cover">
+  <div class="eyebrow">Weekend Bootcamp · The future of data insights — built by you, powered by AI</div>
+  <h1>Build AI Analysts<br><span>in Claude Code</span></h1>
+  <div class="subtitle">GTM Analytics · Saturday + Sunday · 4 Hours Each Day</div>
+  <div class="day-pills">
+    <div class="day-pill sat">
+      <div class="day-name">Saturday</div>
+      <div class="day-time">9:00 am – 1:00 pm</div>
+      <div class="day-phase">Phases 1 &amp; 2 · Foundation + Skills</div>
+    </div>
+    <div class="day-pill sun">
+      <div class="day-name">Sunday</div>
+      <div class="day-time">9:00 am – 1:00 pm</div>
+      <div class="day-phase">Phases 3, 4 &amp; 5 · Agents + Analysis</div>
+    </div>
+  </div>
+</section>
+
+<!-- PRE-WORK -->
+<section class="section" id="prework">
+<h1>Pre-Work: Complete Before Saturday Morning</h1>
+<p>Complete the following steps before starting Saturday. Estimated time: 20–30 minutes. If you run into issues, the Common Issues table in Phase 1 covers the most likely fixes.</p>
+<div class="callout tip"><span class="emoji">💡</span><div><span class="label">Copying commands:</span> Every command in a green code box has a <strong>copy button</strong> in the top-right corner — click it and the command is copied to your clipboard. Paste into your terminal with Ctrl+V (or right-click → Paste in PowerShell).</div></div>
+<div class="callout info"><span class="emoji">ℹ️</span><div><span class="label">Terminal vs Claude Code — know the difference.</span> This bootcamp uses two places to type commands. Learn to tell them apart:<br><br>
+<span class="block-label terminal">▸ Terminal</span> — <strong>Green code boxes</strong> are commands you run in the VS Code integrated terminal (Ctrl+` to open). These are system commands like <code class="ic">git commit</code>, <code class="ic">winget install</code>, and <code class="ic">git status</code>.<br><br>
+<span class="block-label claude-code">▸ Claude Code</span> — <strong>Blue prompt boxes marked with 📝</strong> are prompts you type into the Claude Code panel. Click the starburst icon (✳) in the Activity Bar to open it. These are natural language questions like "Analyze gtm_pipeline.csv."<br><br>
+If you type a terminal command into Claude Code (or vice versa), it won't work. When in doubt, check the box color: <strong>green = terminal, blue = Claude Code</strong>.</div></div>
+
+<h2>Step 1 — Install Claude Code</h2>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Press the Windows key. Type PowerShell. Open Windows PowerShell (no administrator needed).</div></li>
+  <li><span class="num">2</span><div class="step-body">Paste this command and press Enter:
+<div class="code-wrap"><pre>winget install Anthropic.ClaudeCode</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+</div></li>
+</ul>
+<ul class="steps">
+  <li><span class="num">3</span><div class="step-body">Wait 2–5 minutes for the install to complete.</div></li>
+  <li><span class="num">4</span><div class="step-body"><strong>CLOSE</strong> the PowerShell window completely. Open a new one.</div></li>
+  <li><span class="num">5</span><div class="step-body">Verify the install worked:
+<div class="code-wrap"><pre>claude --version</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<p>You should see a version number. If you see 'not recognized', close and reopen PowerShell.</p>
+</div></li>
+</ul>
+
+<h2>Step 1b — Configure Git (First-Time Setup)</h2>
+<p>Git for Windows is installed automatically with Claude Code. You just need to tell it your name and email — this takes 30 seconds.</p>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Open a new PowerShell window.</div></li>
+  <li><span class="num">2</span><div class="step-body">Run these two commands (replace with your own name and work email):
+<div class="code-wrap"><pre>git config --global user.name "Your Name"</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<div class="code-wrap"><pre>git config --global user.email "<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="97eef8e2d7f2eff6fae7fbf2b9f4f8fa">[email&#160;protected]</a>"</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+</div></li>
+</ul>
+<ul class="steps">
+  <li><span class="num">3</span><div class="step-body">Verify git is working:
+<div class="code-wrap"><pre>git --version</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<p>You should see a version number like <code class="ic">git version 2.x.x</code>. If you do, git is ready.</p>
+<div class="callout tip"><span class="emoji">💡</span><div><span class="label">GitHub Desktop (optional):</span> If you prefer a visual interface over terminal commands, install GitHub Desktop from <a href="https://desktop.github.com" style="color:var(--accent)">desktop.github.com</a>. It provides a graphical view of commits, diffs, and history.</div></div>
+</div></li>
+</ul>
+
+<h2>Step 2 — Install VS Code (if not already installed)</h2>
+<p>VS Code is the code editor this bootcamp runs inside. If you already have VS Code installed, skip to Step 2b.</p>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Go to <a href="https://code.visualstudio.com/download" style="color:var(--accent)">code.visualstudio.com/download</a> — click the Windows button to download the installer.</div></li>
+  <li><span class="num">2</span><div class="step-body">Run the downloaded installer (VSCodeSetup-x64-x.x.x.exe). Accept the defaults on every screen and click Next through to Install.</div></li>
+  <li><span class="num">3</span><div class="step-body">When the install finishes, make sure 'Launch Visual Studio Code' is checked and click Finish. VS Code will open.</div></li>
+</ul>
+<div class="callout tip"><span class="emoji">💡</span><div><span class="label">Already installed?</span> Skip directly to Step 2b below.</div></div>
+
+<h2>Step 2b — Install the Claude Code VS Code Extension</h2>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Open VS Code. Press <strong>Ctrl+Shift+X</strong> to open Extensions.</div></li>
+  <li><span class="num">2</span><div class="step-body">Search: <strong>Claude Code</strong>. Install the extension by Anthropic (2M+ installs, verified publisher).</div></li>
+  <li><span class="num">3</span><div class="step-body">Look for the Claude Code starburst icon (✳) in the left Activity Bar. Click it — you should see the Claude Code panel open on the left side.</div></li>
+  <li><span class="num">4</span><div class="step-body">Sign in with your Anthropic account when prompted.</div></li>
+</ul>
+
+<h2>Step 3 — Set Up Your Project Folder</h2>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Create a folder on your computer: <code class="ic">Documents\ai-analyst</code></div></li>
+  <li><span class="num">2</span><div class="step-body">Copy the three sample CSV files into this folder: <code class="ic">gtm_pipeline.csv</code>, <code class="ic">monthly_bookings.csv</code>, <code class="ic">rep_performance.csv</code></div></li>
+  <li><span class="num">3</span><div class="step-body">Open VS Code. Go to <strong>File → Open Folder</strong>. Select the ai-analyst folder.</div></li>
+  <li><span class="num">4</span><div class="step-body">Confirm the three CSV files appear in the VS Code file explorer on the left.</div></li>
+</ul>
+
+<h2>Step 4 — Confirm Everything Works</h2>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">In VS Code, click the Claude Code starburst icon (✳) in the Activity Bar to open the Claude Code panel.</div></li>
+  <li><span class="num">2</span><div class="step-body">Type the following into the <strong>Claude Code panel</strong> and press Enter:</div></li>
+</ul>
+<div class="prompt-box"><div class="prompt-label">📝 Claude Code — verification prompt</div><div class="prompt-text">How many rows are in gtm_pipeline.csv?</div><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<ul class="steps">
+  <li><span class="num">3</span><div class="step-body">Claude Code should read the file and respond with '500 rows'. If it does, you are ready for Saturday.</div></li>
+</ul>
+<div class="callout warn"><span class="emoji">⚠️</span><div><span class="label">You may be prompted to install packages.</span> When Claude Code runs Python to analyze data or create charts, it will ask permission to install libraries like <code class="ic">matplotlib</code> and <code class="ic">pandas</code>. This is normal — <strong>approve these installs</strong>. Claude Code needs them to read CSV files and generate charts. You will see a prompt like "Do you want to execute this command?" — type <strong>Y</strong> and press Enter.</div></div>
+<div class="callout tip"><span class="emoji">💡</span><div><span class="label">Rainbow CSV extension (optional):</span> VS Code may suggest installing the <strong>Rainbow CSV</strong> extension when you open a CSV file. This is a cosmetic extension that color-codes each column to make CSVs easier to read. It is not required — feel free to install it if you like, or dismiss the prompt.</div></div>
+<div class="callout warn"><span class="emoji">⚠️</span><div><span class="label">Claude Code will ask permission to run commands.</span> Throughout this bootcamp, Claude Code will frequently ask <strong>"Do you want to run this command?"</strong> or <strong>"Do you want to execute this command?"</strong> before running bash scripts, creating files, or installing packages. This is a safety feature. Type <strong>Y</strong> and press Enter to approve. You will see this many times — it is normal and expected. If you are ever unsure, you can read the command first before approving.</div></div>
+<div class="callout ok"><span class="emoji">✅</span><div><span class="label">Pre-work complete.</span> You are ready for Saturday. The bootcamp content begins below.</div></div>
+</section>
+
+<hr class="divider">
+
+<!-- ABOUT -->
+<section class="section" id="about">
+<h1>About This Bootcamp</h1>
+<p>This is a self-paced course you work through independently, structured across two 4-hour sessions — Saturday and Sunday — and requires no coding experience. By Sunday evening you will have a working AI analyst system on your laptop, a completed analysis of real data, and a slide deck outline ready for Monday.</p>
+<p>All practice work uses the three sample data files included with this pack. No company data is used at any point. The Pre-Work section above must be completed before Saturday morning — it takes 20–30 minutes.</p>
+</section>
+
+<!-- SAMPLE DATA -->
+<section class="section" id="data">
+<h1>Sample Data Files (Included)</h1>
+<p>Three CSV files are provided with this training pack. They contain realistic, anonymized GTM sales data — no real company information. Place all three files in your project folder before Saturday morning.</p>
+<table class="data-table">
+<thead><tr><th>File</th><th>Rows</th><th>Fields &amp; Purpose</th></tr></thead>
+<tbody>
+<tr><td class="fname">gtm_pipeline.csv</td><td class="rows">500 rows, 16 cols</td><td class="desc">opportunity_id, account_name, rep_name, region, vertical, stage, stage_number, arr_value, close_date, created_date, created_quarter, source, deal_type — Practice: pipeline analysis, win rate, stage conversion, sales cycle</td></tr>
+<tr><td class="fname">monthly_bookings.csv</td><td class="rows">432 rows, 18 cols</td><td class="desc">year, month, quarter, region, vertical, new_logo_arr, expansion_arr, renewal_arr, total_arr, sqo_count, win_rate_pct, avg_deal_size, pipeline_coverage, new_logos_closed — Practice: bookings trend, ARR mix, win rate by region and vertical</td></tr>
+<tr><td class="fname">rep_performance.csv</td><td class="rows">120 rows, 17 cols</td><td class="desc">rep_name, region, vertical, quarter, year, tenure_months, quota, attainment, attainment_pct, win_rate_pct, avg_deal_size, pipeline_value, sqo_count, activities_per_week — Practice: rep scorecard, quota attainment, performance trends over 6 quarters</td></tr>
+</tbody>
+</table>
+<div class="callout tip"><span class="emoji">💡</span><div><span class="label">How to use:</span> All exercises reference these files by name. When asked to 'Analyze the data', point Claude at the file: 'Analyze gtm_pipeline.csv.' You do not need to know what is in the files in advance — part of the exercise is having Claude describe and explore them.</div></div>
+</section>
+
+<hr class="divider">
+
+<!-- SATURDAY -->
+<section class="section" id="saturday">
+<div class="session-banner sat">
+  <div class="phase">SATURDAY · Phases 1 &amp; 2</div>
+  <h2>Foundation + Skills</h2>
+  <div class="meta">9:00 am – 1:00 pm · 4 Hours</div>
+</div>
+<p>Saturday covers the foundation: getting Claude Code running, understanding how the system works, and building the five skills that will power every analysis. By 1:00 pm you will have a configured environment and a full /skills library ready to use.</p>
+
+<h3 id="sat-schedule">Saturday Schedule</h3>
+<table class="sched-table">
+<thead><tr><th>Time</th><th>Activity</th><th>What You Build</th></tr></thead>
+<tbody>
+<tr class="alt"><td class="time">8:30 am</td><td>Pre-session: confirm install is working</td><td class="note-col">Run: claude --version in PowerShell</td></tr>
+<tr class="highlight"><td class="time">9:00 am</td><td><strong>PHASE 1A — Open VS Code, load project folder</strong></td><td class="note-col">File → Open Folder → ai-analyst</td></tr>
+<tr><td class="time">9:15 am</td><td>PHASE 1B — Create CLAUDE.md</td><td class="note-col">Paste starter template, save</td></tr>
+<tr><td class="time">9:30 am</td><td>PHASE 1C — Initialize git repo</td><td class="note-col">git init, .gitignore, first commit</td></tr>
+<tr><td class="time">9:45 am</td><td>PHASE 1D — First analysis (gtm_pipeline.csv)</td><td class="note-col">Chart: Total ARR by region</td></tr>
+<tr class="alt"><td class="time">10:05 am</td><td>Troubleshooting — check the fixes table if stuck</td><td class="note-col">See Phase 1 Common Issues table</td></tr>
+<tr><td class="time">10:25 am</td><td>PHASE 2A — Create /skills folder + Skill 1</td><td class="note-col">chart-style.md — colors, titles</td></tr>
+<tr><td class="time">10:45 am</td><td>PHASE 2B — Skill 2</td><td class="note-col">data-quality.md — null checks, outliers</td></tr>
+<tr class="alt highlight"><td class="time">11:05 am</td><td><strong>BREAK</strong></td><td class="note-col">10 minutes</td></tr>
+<tr><td class="time">11:15 am</td><td>PHASE 2C — Skill 3</td><td class="note-col">question-framing.md — MECE hypotheses</td></tr>
+<tr><td class="time">11:35 am</td><td>PHASE 2D — Skill 4</td><td class="note-col">metric-specs.md — KPI definitions</td></tr>
+<tr><td class="time">11:55 am</td><td>PHASE 2E — Skill 5</td><td class="note-col">storytelling.md — SCR narrative format</td></tr>
+<tr class="alt"><td class="time">12:15 pm</td><td>Test all 5 skills with sample questions</td><td class="note-col">Ask Claude: run a quality check on the data</td></tr>
+<tr><td class="time">12:35 pm</td><td>Saturday wrap-up + git commit all skills</td><td class="note-col">git add -A, commit: "checkpoint: all skills"</td></tr>
+<tr class="alt highlight"><td class="time">1:00 pm</td><td><strong>END OF SATURDAY</strong></td><td class="note-col">Optional: explore data independently</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- PHASE 1 -->
+<section class="section" id="phase1">
+<h2>Saturday — Phase 1: Foundation (9:00–10:20 am)</h2>
+<p>Phase 1 gets Claude Code running and connected to the sample data. If pre-work was completed, this session is mostly about orientation and running the first analysis.</p>
+
+<h3>Step 1 — Open VS Code and Load the Project Folder</h3>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Open VS Code on your Windows machine.</div></li>
+  <li><span class="num">2</span><div class="step-body">Go to <strong>File → Open Folder</strong>. Navigate to the folder where you placed the three sample CSV files (e.g. Documents\ai-analyst). Click Select Folder.</div></li>
+  <li><span class="num">3</span><div class="step-body">You should see the three CSV files listed in the VS Code file explorer on the left: gtm_pipeline.csv, monthly_bookings.csv, rep_performance.csv.</div></li>
+  <li><span class="num">4</span><div class="step-body">Open the Claude Code panel by clicking the Claude Code starburst icon (✳) in the left Activity Bar.</div></li>
+</ul>
+<div class="callout ok"><span class="emoji">✅</span><div><span class="label">Check:</span> The Claude Code starburst icon (✳) is visible in the Activity Bar and the panel opens on the left. If not, press Ctrl+Shift+X, search 'Claude Code' by Anthropic, and install.</div></div>
+
+<h3>Step 2 — Create Your CLAUDE.md</h3>
+<p>CLAUDE.md is the most important file in your project. It is the standing briefing Claude reads every time it opens — defining who the analyst is, what data it works with, and what standards to follow.</p>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">In VS Code, go to <strong>File → New File</strong> (Ctrl+N). Press Ctrl+S to save it immediately. Name it <code class="ic">CLAUDE.md</code> and save it in the root of your project folder.</div></li>
+  <li><span class="num">2</span><div class="step-body">Paste the following starter CLAUDE.md into the file:
+<div class="code-wrap code-file"><pre># GTM Analyst Configuration
+
+## Role
+You are a GTM sales analytics expert for a B2B SaaS company.
+You analyze pipeline, bookings, and rep performance data.
+
+## Skills
+Always read and apply skills from the /skills folder before any analysis.
+Reference: @skills/chart-style.md, @skills/data-quality.md,
+@skills/question-framing.md, @skills/metric-specs.md, @skills/storytelling.md
+
+## Output Standards
+- Save all charts as PNG files in the /outputs folder
+- Use action-oriented chart titles (describe the finding, not the topic)
+- Every analysis ends with a 3-sentence executive summary
+- Format numbers: ARR in $000s, percentages to 1 decimal place
+
+## Data Files
+- gtm_pipeline.csv: 500 opportunities, 16 columns
+- monthly_bookings.csv: 432 rows, 18 columns -- 24 months x 4 regions x 6 verticals
+- rep_performance.csv: 120 rows, 17 columns -- 20 reps x 6 quarters
+
+## Agents
+Available agents -- use these for complex questions:
+@agents/hypothesis-generator.md
+@agents/descriptive-analytics.md
+@agents/root-cause.md
+@agents/narrative-writer.md
+@agents/presentation-builder.md</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+</div></li>
+</ul>
+<ul class="steps">
+  <li><span class="num">3</span><div class="step-body">Save the file (Ctrl+S). You will expand this in Phase 2.</div></li>
+</ul>
+
+<h3>Step 3 — Initialize Git and Make Your First Commit</h3>
+<p>Git is version control — it lets you save checkpoints of your work, see what changed, and roll back if something breaks. Think of it as an undo history that never expires.</p>
+<div class="callout info"><span class="emoji">ℹ️</span><div><span class="label">Why git?</span> Every skill and agent file you build this weekend is a plain text file. Git tracks every change. If you edit a skill and Claude starts producing worse output, <code class="ic">git diff</code> shows exactly what changed and <code class="ic">git checkout</code> restores the previous version in seconds.</div></div>
+
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Open the VS Code integrated terminal with the keyboard shortcut <strong>Ctrl+`</strong> (the backtick key, to the left of the 1 key). Alternatively, click <strong>Terminal → New Terminal</strong> in the menu bar. If the menu bar is hidden behind a three-dot (…) button at the top, click that first.</div></li>
+  <li><span class="num">2</span><div class="step-body">Initialize a git repository and rename the branch to <code class="ic">main</code> (some versions of Git default to <code class="ic">master</code>, but GitHub expects <code class="ic">main</code>):
+    <div class="code-wrap"><pre>git init</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+    <div class="code-wrap"><pre>git branch -M main</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+  </div></li>
+  <li><span class="num">3</span><div class="step-body">Create a <code class="ic">.gitignore</code> file in your project root (File → New File, save as <code class="ic">.gitignore</code>) and paste in the following. Press <strong>Ctrl+S</strong> to save.
+    <div class="code-wrap code-file"><pre>outputs/
+__pycache__/
+*.pyc
+*.png
+*.jpg
+.DS_Store
+Thumbs.db</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+  </div></li>
+  <li><span class="num">4</span><div class="step-body">Stage all your files for the first commit:
+    <div class="code-wrap"><pre>git add -A</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+  </div></li>
+  <li><span class="num">5</span><div class="step-body">Make your first commit:
+    <div class="code-wrap"><pre>git commit -m "initial: project setup with CLAUDE.md and sample data"</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+  </div></li>
+  <li><span class="num">6</span><div class="step-body">Check your status and history at any time:
+    <div class="code-wrap"><pre>git status</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+    <div class="code-wrap"><pre>git log --oneline</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+  </div></li>
+</ul>
+<div class="callout tip"><span class="emoji">💡</span><div><span class="label">Why exclude outputs?</span> Chart PNG files are large and change every run. The skill and agent .md files — the real intellectual property — are what you want to track.</div></div>
+<div class="callout ok"><span class="emoji">✅</span><div><span class="label">Git is ready.</span> Commit after every meaningful change: after each skill, after all agents, after a successful run. A commit is free — make them often.</div></div>
+
+<h3>Step 4 — Run Your First Analysis</h3>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Click the Claude Code starburst icon (✳) in the Activity Bar to open the Claude Code panel.</div></li>
+  <li><span class="num">2</span><div class="step-body">Type the following prompt and press Enter:</div></li>
+</ul>
+<div class="prompt-box"><div class="prompt-label">📝 First analysis prompt</div><div class="prompt-text">Describe gtm_pipeline.csv. What fields does it contain and what does each one mean? Then show me total ARR by region as a bar chart.</div><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<ul class="steps">
+  <li><span class="num">3</span><div class="step-body">Watch Claude Code read the file, write code, and produce a chart. The PNG will appear in your project folder.</div></li>
+  <li><span class="num">4</span><div class="step-body">Open the PNG chart. Check: does it have an action-oriented title? Is the formatting clean?</div></li>
+  <li><span class="num">5</span><div class="step-body">Ask a follow-up question to confirm the feedback loop works:</div></li>
+</ul>
+<div class="prompt-box"><div class="prompt-label">📝 Follow-up prompt</div><div class="prompt-text">Now show win rate by vertical as a horizontal bar chart. Sort highest to lowest.</div><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<div class="callout ok"><span class="emoji">✅</span><div><span class="label">Phase 1 complete.</span> You have a working Claude Code environment, git initialized, a configured CLAUDE.md, and two charts from the sample data. Move to Phase 2.</div></div>
+
+<h3>Phase 1 — Common Issues &amp; Fixes</h3>
+<table class="data-table">
+<thead><tr><th>Problem</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td class="fname">'claude' is not recognized</td><td class="desc">Close the terminal completely and open a fresh one. The PATH update from install only applies to new terminal sessions.</td></tr>
+<tr><td class="fname">winget not found</td><td class="desc">Go to microsoft.com/store and search 'App Installer' — install it, then retry. Or download the Claude Code installer from docs.anthropic.com.</td></tr>
+<tr><td class="fname">Extension not visible after install</td><td class="desc">Press Ctrl+Shift+P → type 'Developer: Reload Window' → press Enter. Then look for the starburst icon (✳) in the Activity Bar.</td></tr>
+<tr><td class="fname">'No available IDEs detected'</td><td class="desc">Open your project folder in VS Code first (File → Open Folder), then start Claude Code. The CLI needs VS Code to have a folder loaded.</td></tr>
+<tr><td class="fname">CSV file not found by Claude Code</td><td class="desc">Make sure the CSV file is in the same folder as your CLAUDE.md. Use the VS Code file explorer to confirm both files appear in the project root.</td></tr>
+<tr><td class="fname">Corporate proxy blocking install</td><td class="desc">Contact IT to whitelist: winget.azureedge.net and api.anthropic.com. Both are needed for install and ongoing use.</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- PHASE 2 -->
+<section class="section" id="phase2">
+<h2>Saturday — Phase 2: Building the 5 Skills (10:25 am–1:00 pm)</h2>
+<p>Skills are plain markdown files that Claude reads before running analysis. They encode your team's standards — chart styles, data quality checks, metric definitions — so Claude applies them automatically without being asked each time.</p>
+<p>Create a folder called <code class="ic">skills</code> inside your project folder. All five skill files go inside it.</p>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">In VS Code, right-click your project folder in the file explorer and choose <strong>New Folder</strong>. Name it: <code class="ic">skills</code></div></li>
+  <li><span class="num">2</span><div class="step-body">Right-click the skills folder and choose <strong>New File</strong> for each skill below.</div></li>
+</ul>
+
+<h3>Skill 1: chart-style.md</h3>
+<p>Controls how every chart looks — colors, titles, labels, and forbidden patterns.</p>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Right-click the <code class="ic">skills</code> folder → <strong>New File</strong> → name it <code class="ic">chart-style.md</code></div></li>
+  <li><span class="num">2</span><div class="step-body">Copy the code below and paste it into the file.</div></li>
+  <li><span class="num">3</span><div class="step-body">Press <strong>Ctrl+S</strong> to save. You must save the file or Claude Code will not be able to see it.</div></li>
+</ul>
+<div class="code-wrap code-file"><pre># Chart Style Skill
+## Purpose
+Define the visual standard for all charts this analyst produces.
+## Rules
+1. Chart titles must state the finding (e.g. 'North America Leads ARR at 58%'), not the topic ('ARR by Region').
+2. Use dark background (#1A1A2E), green accent (#00D639), white text.
+3. Always label data values directly on bar and column charts.
+4. Sort bar charts from highest to lowest unless time-ordered.
+5. Never use pie charts or 3D charts.
+6. Use consistent font: Arial or sans-serif.
+## Do Not
+- Do not use default matplotlib or seaborn color palettes.
+- Do not produce charts without titles.
+- Do not use gridlines on bar charts.</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<div class="prompt-box"><div class="prompt-label">📝 Test prompt</div><div class="prompt-text">Apply the chart-style skill and show total ARR by rep as a bar chart from gtm_pipeline.csv.</div><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+
+<h3>Skill 2: data-quality.md</h3>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Right-click the <code class="ic">skills</code> folder → <strong>New File</strong> → name it <code class="ic">data-quality.md</code></div></li>
+  <li><span class="num">2</span><div class="step-body">Copy the code below and paste it into the file.</div></li>
+  <li><span class="num">3</span><div class="step-body">Press <strong>Ctrl+S</strong> to save.</div></li>
+</ul>
+<div class="code-wrap code-file"><pre># Data Quality Skill
+## Purpose
+Run data quality checks before every analysis and flag issues.
+## Checks to Run
+1. Null values: count missing values in each field. Flag any field with >5% nulls.
+2. Date gaps: check for missing months or periods in time-series data.
+3. Outliers: flag any ARR or deal value more than 3 standard deviations from the mean.
+4. Duplicate records: check for duplicate IDs or identical rows.
+5. Stage consistency: confirm stage_number matches stage name.
+## Output
+Produce a 3-line data quality summary before every analysis:
+'Data quality: X records, Y fields. Issues: [list or None]. Proceeding.'</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+
+<h3>Skill 3: question-framing.md</h3>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Right-click the <code class="ic">skills</code> folder → <strong>New File</strong> → name it <code class="ic">question-framing.md</code></div></li>
+  <li><span class="num">2</span><div class="step-body">Copy the code below and paste it into the file.</div></li>
+  <li><span class="num">3</span><div class="step-body">Press <strong>Ctrl+S</strong> to save.</div></li>
+</ul>
+<div class="code-wrap code-file"><pre># Question Framing Skill
+## Purpose
+Decompose any business question into MECE hypotheses before analyzing.
+## Process
+1. Restate the question in one sentence.
+2. Generate 3-5 mutually exclusive hypotheses that could explain the pattern.
+3. For each hypothesis, state what data would confirm or refute it.
+4. Rank hypotheses by likelihood given the available data.
+5. Only then begin analysis, starting with the most likely hypothesis.
+## Example
+Question: 'Why did win rate fall in Q2?'
+H1: Deal mix shifted to larger, harder deals (check avg deal size).
+H2: New reps joined and dragged down overall rate (check tenure vs win rate).
+H3: A specific vertical underperformed (check win rate by vertical).</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+
+<h3>Skill 4: metric-specs.md</h3>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Right-click the <code class="ic">skills</code> folder → <strong>New File</strong> → name it <code class="ic">metric-specs.md</code></div></li>
+  <li><span class="num">2</span><div class="step-body">Copy the code below and paste it into the file.</div></li>
+  <li><span class="num">3</span><div class="step-body">Press <strong>Ctrl+S</strong> to save.</div></li>
+</ul>
+<div class="code-wrap code-file"><pre># Metric Specifications Skill
+## Purpose
+Define GTM KPIs precisely so every calculation is consistent.
+## Core Metrics
+ARR (Annual Recurring Revenue): Sum of arr_value for Closed Won deals.
+Win Rate: Closed Won count / (Closed Won + Closed Lost count) x 100.
+SQO (Sales Qualified Opportunity): Opportunities at Stage 2 or above.
+Pipeline Coverage: Total open pipeline ARR / Quarterly quota target.
+Avg Deal Size: Total ARR / Count of Closed Won deals.
+Avg Sales Cycle: Mean days from created_date to close_date (Closed Won only).
+Quota Attainment %: Actual ARR / Quota target x 100.
+## Formatting
+ARR: always in $000s with one decimal (e.g. $48.0K).
+Percentages: one decimal place (e.g. 34.2%).
+Sales cycle: integer days (e.g. 67 days).</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+
+<h3>Skill 5: storytelling.md</h3>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Right-click the <code class="ic">skills</code> folder → <strong>New File</strong> → name it <code class="ic">storytelling.md</code></div></li>
+  <li><span class="num">2</span><div class="step-body">Copy the code below and paste it into the file.</div></li>
+  <li><span class="num">3</span><div class="step-body">Press <strong>Ctrl+S</strong> to save.</div></li>
+</ul>
+<div class="code-wrap code-file"><pre># Storytelling Skill
+## Purpose
+Structure every analysis narrative using the SCR framework.
+## SCR Framework
+SITUATION: What is the current state? (1-2 sentences of context.)
+COMPLICATION: What has changed or is at risk? (The insight or finding.)
+RESOLUTION: What should happen next? (A clear recommendation.)
+## Rules
+1. Every analysis ends with a 3-paragraph SCR executive summary.
+2. Chart titles are written as findings, not topics.
+3. Use plain English -- avoid jargon.
+4. The recommendation must be specific and actionable.</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+
+<h3>Testing All 5 Skills Together</h3>
+<div class="prompt-box"><div class="prompt-label">📝 Skills test prompt</div><div class="prompt-text">Run a full analysis of monthly_bookings.csv. Apply all skills: check data quality first, frame the question before analyzing, use the chart style, apply metric specs, and end with an SCR executive summary.</div><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+
+<h3>Commit Your Skills — Saturday Checkpoint</h3>
+<p>Run the following commands in the <strong>VS Code terminal</strong> (Ctrl+` to open) — not in Claude Code:</p>
+<div class="code-wrap"><pre>git status</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<div class="code-wrap"><pre>git add -A</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<div class="code-wrap"><pre>git commit -m "checkpoint: all 5 skills built and tested"</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<div class="code-wrap"><pre>git log --oneline</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<div class="callout tip"><span class="emoji">💡</span><div><span class="label">Commit message convention:</span> Use 'checkpoint: [what you built]'. Examples: 'checkpoint: chart-style skill', 'checkpoint: all agents', 'fix: metric-specs win rate calculation'.</div></div>
+</section>
+
+<hr class="divider">
+
+<!-- SUNDAY -->
+<section class="section" id="sunday">
+<div class="session-banner sun">
+  <div class="phase">SUNDAY · Phases 3, 4 &amp; 5</div>
+  <h2>Agents + Analysis + Forward Deployed</h2>
+  <div class="meta">9:00 am – 1:00 pm · 4 Hours</div>
+</div>
+<p>Sunday builds the agent chain that automates multi-step analysis, runs it on all three data files, and produces a shareable output. Phase 5 introduces the Forward Deployed Analyst model.</p>
+
+<h3 id="sun-schedule">Sunday Schedule</h3>
+<table class="sched-table">
+<thead><tr><th>Time</th><th>Activity</th><th>What You Build</th></tr></thead>
+<tbody>
+<tr class="alt"><td class="time">8:45 am</td><td>Re-open project, confirm skills are working</td><td class="note-col">Quick test: ask a question, check skill output</td></tr>
+<tr class="highlight"><td class="time">9:00 am</td><td><strong>Review Saturday output + fix any issues</strong></td><td class="note-col">Re-run a skills test to confirm everything still works</td></tr>
+<tr><td class="time">9:20 am</td><td>PHASE 3A — Create /agents folder + Agent 1</td><td class="note-col">hypothesis-generator.md</td></tr>
+<tr><td class="time">9:35 am</td><td>PHASE 3B — Agent 2</td><td class="note-col">descriptive-analytics.md</td></tr>
+<tr><td class="time">9:50 am</td><td>PHASE 3C — Agent 3</td><td class="note-col">root-cause.md</td></tr>
+<tr><td class="time">10:05 am</td><td>PHASE 3D — Agent 4</td><td class="note-col">narrative-writer.md</td></tr>
+<tr><td class="time">10:20 am</td><td>PHASE 3E — Agent 5</td><td class="note-col">presentation-builder.md</td></tr>
+<tr class="alt"><td class="time">10:30 am</td><td>Git commit all agents</td><td class="note-col">git add -A, commit: "checkpoint: all agents"</td></tr>
+<tr class="alt highlight"><td class="time">10:40 am</td><td><strong>BREAK</strong></td><td class="note-col">10 minutes</td></tr>
+<tr><td class="time">10:50 am</td><td>PHASE 4 — Run full agent chain on all 3 data files</td><td class="note-col">The Monday Morning Test</td></tr>
+<tr class="alt"><td class="time">11:15 am</td><td>Validate outputs — apply the stakeholder test</td><td class="note-col">Would you show this chart to a sales leader?</td></tr>
+<tr><td class="time">11:35 am</td><td>Iterate: fix one skill or agent based on output</td><td class="note-col">Edit the file, re-run, compare the result</td></tr>
+<tr><td class="time">11:50 am</td><td>Git commit final outputs</td><td class="note-col">git add -A, commit: "final analysis outputs"</td></tr>
+<tr class="highlight"><td class="time">12:00 pm</td><td><strong>PHASE 5 — Forward Deployed Analyst</strong></td><td class="note-col">Run the stakeholder scenario using the prompts below</td></tr>
+<tr><td class="time">12:25 pm</td><td>Build a stakeholder-specific CLAUDE.md template</td><td class="note-col">RVP persona worked example</td></tr>
+<tr class="alt"><td class="time">12:45 pm</td><td>Final recap + next steps</td><td class="note-col">Review what you built, plan your first real use case</td></tr>
+<tr class="alt highlight"><td class="time">1:00 pm</td><td><strong>END OF BOOTCAMP</strong></td><td class="note-col">You have a working AI analyst system — use it Monday</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- PHASE 3 -->
+<section class="section" id="phase3">
+<h2>Sunday — Phase 3: Building the 5 Agents (9:00–10:35 am)</h2>
+<p>Agents are markdown files that define a workflow — a sequence of steps Claude follows to answer a question. Unlike skills (which define standards), agents define processes. Create an <code class="ic">agents</code> folder inside your project folder.</p>
+<ul class="steps"><li><span class="num">1</span><div class="step-body">In VS Code, right-click your project folder and choose <strong>New Folder</strong>. Name it: <code class="ic">agents</code></div></li></ul>
+
+<h3>Agent 1: hypothesis-generator.md</h3>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Right-click the <code class="ic">agents</code> folder → <strong>New File</strong> → name it <code class="ic">hypothesis-generator.md</code></div></li>
+  <li><span class="num">2</span><div class="step-body">Copy the code below and paste it into the file.</div></li>
+  <li><span class="num">3</span><div class="step-body">Press <strong>Ctrl+S</strong> to save. As with skills, the file must be saved or Claude Code will not see it.</div></li>
+</ul>
+<div class="code-wrap code-file"><pre># Hypothesis Generator Agent
+## Trigger: Run when given a business performance question.
+## Steps
+1. Apply @skills/question-framing.md
+2. Restate the question in one sentence.
+3. Generate 3-5 MECE hypotheses.
+4. For each, state the confirming/refuting data.
+5. Rank by likelihood and output as a numbered list.
+6. Proceed to descriptive analysis of the top hypothesis.</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+
+<h3>Agent 2: descriptive-analytics.md</h3>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Right-click the <code class="ic">agents</code> folder → <strong>New File</strong> → name it <code class="ic">descriptive-analytics.md</code></div></li>
+  <li><span class="num">2</span><div class="step-body">Copy the code below and paste it into the file.</div></li>
+  <li><span class="num">3</span><div class="step-body">Press <strong>Ctrl+S</strong> to save.</div></li>
+</ul>
+<div class="code-wrap code-file"><pre># Descriptive Analytics Agent
+## Trigger: Run after hypothesis generator, or when asked for summary stats.
+## Steps
+1. Apply @skills/data-quality.md -- run checks first.
+2. Apply @skills/metric-specs.md -- use correct calculations.
+3. Produce: summary statistics (mean, median, min, max) for key metrics.
+4. Produce: trend chart over time (if time data available).
+5. Produce: breakdown by top 2-3 dimensions (region, vertical, rep).
+6. Apply @skills/chart-style.md to all charts.
+7. Flag any anomalies or outliers found.</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+
+<h3>Agent 3: root-cause.md</h3>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Right-click the <code class="ic">agents</code> folder → <strong>New File</strong> → name it <code class="ic">root-cause.md</code></div></li>
+  <li><span class="num">2</span><div class="step-body">Copy the code below and paste it into the file.</div></li>
+  <li><span class="num">3</span><div class="step-body">Press <strong>Ctrl+S</strong> to save.</div></li>
+</ul>
+<div class="code-wrap code-file"><pre># Root Cause Agent
+## Trigger: Run when a metric is off-target or anomalous.
+## Steps
+1. Identify the metric and period in question.
+2. Decompose: drill into each dimension (region, vertical, rep, deal size).
+3. For each dimension, calculate contribution to the total variance.
+4. Identify the dimension with the highest contribution.
+5. Drill one level deeper into that dimension.
+6. State the root cause in one sentence: 'The [metric] declined because [cause].'
+7. Produce a waterfall or breakdown chart showing contribution.</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+
+<h3>Agent 4: narrative-writer.md</h3>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Right-click the <code class="ic">agents</code> folder → <strong>New File</strong> → name it <code class="ic">narrative-writer.md</code></div></li>
+  <li><span class="num">2</span><div class="step-body">Copy the code below and paste it into the file.</div></li>
+  <li><span class="num">3</span><div class="step-body">Press <strong>Ctrl+S</strong> to save.</div></li>
+</ul>
+<div class="code-wrap code-file"><pre># Narrative Writer Agent
+## Trigger: Run after analysis is complete, before presentation.
+## Steps
+1. Apply @skills/storytelling.md
+2. Write a 3-paragraph SCR executive summary:
+   SITUATION: What is the current state of [metric]?
+   COMPLICATION: What has changed, declined, or is at risk?
+   RESOLUTION: What specific action is recommended?
+3. Write a headline (one sentence, finding-first).
+4. Write 3 supporting bullet points.
+5. Confirm the narrative matches the charts produced.</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+
+<h3>Agent 5: presentation-builder.md</h3>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Right-click the <code class="ic">agents</code> folder → <strong>New File</strong> → name it <code class="ic">presentation-builder.md</code></div></li>
+  <li><span class="num">2</span><div class="step-body">Copy the code below and paste it into the file.</div></li>
+  <li><span class="num">3</span><div class="step-body">Press <strong>Ctrl+S</strong> to save.</div></li>
+</ul>
+<div class="code-wrap code-file"><pre># Presentation Builder Agent
+## Trigger: Run last, to assemble analysis into a slide structure.
+## Steps
+1. Produce a 5-slide outline:
+   Slide 1 -- Title: [Question being answered] + date
+   Slide 2 -- Situation: 2 charts + 3 bullet context points
+   Slide 3 -- Finding: 1 main chart + root cause statement
+   Slide 4 -- Recommendation: 3 specific actions with owners
+   Slide 5 -- Appendix: supporting charts and data quality notes
+2. For each slide, list the chart filenames to include.
+3. Write speaker notes (2-3 sentences) for slides 2-4.
+4. Output the outline as a structured markdown file: outline.md</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+
+<h3>Commit Your Agents — Sunday Checkpoint</h3>
+<p>Run the following commands in the <strong>VS Code terminal</strong> (Ctrl+` to open) — not in Claude Code:</p>
+<div class="code-wrap"><pre>git add -A</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<div class="code-wrap"><pre>git commit -m "checkpoint: all 5 agents built and registered"</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<div class="callout tip"><span class="emoji">💡</span><div><span class="label">Branching (optional):</span> To experiment with an agent variant without losing the working version: <code class="ic">git checkout -b experiment/new-root-cause</code>. Switch back with <code class="ic">git checkout main</code>.</div></div>
+</section>
+
+<!-- PHASE 4 -->
+<section class="section" id="phase4">
+<h2>Sunday — Phase 4: The Monday Morning Test (10:50–11:55 am)</h2>
+<p>The Monday Morning Test: open the repo, ask a real business question, get a shareable answer. Run the full agent chain on each of the three sample data files in sequence.</p>
+
+<h3>Run 1 — Pipeline Analysis (gtm_pipeline.csv)</h3>
+<div class="prompt-box"><div class="prompt-label">📝 Full chain prompt — Run 1</div><div class="prompt-text">Run the full agent chain on gtm_pipeline.csv. Business question: Which region has the strongest pipeline health and where are we most at risk of missing target?</div><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<p>Expected output: hypotheses list → data quality report → 3–4 charts → root cause finding → SCR narrative → slide outline saved as outline.md</p>
+
+<h3>Run 2 — Bookings Trend Analysis (monthly_bookings.csv)</h3>
+<div class="prompt-box"><div class="prompt-label">📝 Full chain prompt — Run 2</div><div class="prompt-text">Run the full agent chain on monthly_bookings.csv. Business question: Is ARR growth accelerating or decelerating and which vertical is driving the trend?</div><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+
+<h3>Run 3 — Rep Performance (rep_performance.csv)</h3>
+<div class="prompt-box"><div class="prompt-label">📝 Full chain prompt — Run 3</div><div class="prompt-text">Run the full agent chain on rep_performance.csv. Business question: Which reps are most at risk of missing annual quota and what do the top performers have in common?</div><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+
+<h3>Validate the Outputs</h3>
+<ul class="buls">
+  <li>Charts are in the /outputs folder and open correctly as images</li>
+  <li>Chart titles state a finding, not just a topic</li>
+  <li>The SCR executive summary is 3 paragraphs and ends with a specific recommendation</li>
+  <li>The slide outline (outline.md) has 5 slides with speaker notes</li>
+  <li>Metric calculations match the definitions in metric-specs.md</li>
+</ul>
+<div class="callout tip"><span class="emoji">💡</span><div><span class="label">Iteration tip:</span> If an output looks wrong, identify which skill or agent caused the issue and edit that single file. Re-run the prompt. This is the feedback loop that makes the system improve over time.</div></div>
+
+<h3>Commit Your Final Outputs</h3>
+<p>Run the following commands in the <strong>VS Code terminal</strong> (Ctrl+` to open) — not in Claude Code:</p>
+<div class="code-wrap"><pre>git diff</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<div class="code-wrap"><pre>git add -A</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<div class="code-wrap"><pre>git commit -m "final: validated analysis system — skills and agents production ready"</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<div class="code-wrap"><pre>git log --oneline</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<div class="callout tip"><span class="emoji">💡</span><div><span class="label">Sharing the repo:</span> To share with a colleague: <code class="ic">git remote add origin &lt;your-repo-url&gt;</code> then <code class="ic">git push -u origin main</code>. They clone it and have a working system in minutes. The CSV files stay local — only skills, agents, and CLAUDE.md travel with the repo.</div></div>
+</section>
+
+<!-- PHASE 5 -->
+<section class="section" id="phase5">
+<h2>Sunday — Phase 5: The Forward Deployed Analyst (12:00–1:00 pm)</h2>
+<p>Phase 5 introduces the Forward Deployed Analyst model: bringing Claude Code directly into a working session with a sales leader to answer questions in real time.</p>
+
+<h3>Stakeholder Scenario — Run It Yourself</h3>
+<p>Simulate a working session with a sales leader. You play both roles: ask the questions below as if you were an RVP reviewing Q2 pipeline, then answer each one using Claude Code and the sample data.</p>
+<ul class="buls">
+  <li>RVP: 'Which of my reps is most likely to miss quota this quarter?'</li>
+  <li>RVP: 'What is driving the low win rate in EMEA compared to North America?'</li>
+  <li>RVP: 'If I want to hit $1M ARR this quarter, which deals should I focus on?'</li>
+</ul>
+<div class="prompt-box"><div class="prompt-label">📝 Stakeholder question prompt</div><div class="prompt-text">The RVP wants to know: which rep is most at risk of missing annual quota? Use rep_performance.csv. Show the answer as a chart and give a 2-sentence recommendation.</div><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+
+<h3>Build a Stakeholder CLAUDE.md Template</h3>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Create a new file called <code class="ic">CLAUDE-RVP.md</code> in your project folder (File → New File, then Ctrl+S to name and save it).</div></li>
+  <li><span class="num">2</span><div class="step-body">Paste in the following, then press <strong>Ctrl+S</strong> to save:
+<div class="code-wrap code-file"><pre># RVP Analyst Configuration
+## Stakeholder
+Regional Vice President, North America. Manages 5 Account Executives.
+Reviews pipeline weekly. Primary concern: quota attainment and deal velocity.
+## Preferred Metrics
+Quota attainment %, pipeline coverage, win rate by rep, avg deal size.
+## Communication Style
+Short answers. Lead with the number. Show one chart. Recommend one action.
+Do not show methodology unless asked.
+## Data Access
+rep_performance.csv, gtm_pipeline.csv (North America region only).</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+</div></li>
+</ul>
+<ul class="steps">
+  <li><span class="num">3</span><div class="step-body">Ask Claude Code to use this persona:</div></li>
+</ul>
+<div class="prompt-box"><div class="prompt-label">📝 Persona prompt</div><div class="prompt-text">Use CLAUDE-RVP.md as my configuration. The RVP is asking: what is the single most important thing I should do this week to protect my quarterly number?</div><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+
+<h3>Commit Your Forward Deployed Setup</h3>
+<p>Run the following commands in the <strong>VS Code terminal</strong> (Ctrl+` to open) -- not in Claude Code:</p>
+<div class="code-wrap"><pre>git add -A</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<div class="code-wrap"><pre>git commit -m "checkpoint: CLAUDE-RVP stakeholder template added"</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<div class="code-wrap"><pre>git log --oneline</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<div class="callout ok"><span class="emoji">✅</span><div><span class="label">Bootcamp complete.</span> You now have five commits tracking every stage of your build. Run <code class="ic">git log --oneline</code> to see the full history.</div></div>
+</section>
+
+<hr class="divider">
+
+<!-- GIT REFERENCE -->
+<section class="section" id="git-ref">
+<h1>Git Quick Reference &amp; Tutorial</h1>
+<p>Git is the version control system that tracks every change you make to your skill and agent files. This section covers the commands used in this bootcamp, plus how to back up your work to GitHub so you can share it or access it from another computer.</p>
+
+<h2>What is Git?</h2>
+<p>Think of git as an unlimited undo history for your entire project folder. Every time you run <code class="ic">git commit</code>, git takes a snapshot of every file. You can view any previous snapshot, compare what changed between two snapshots, or roll back to an earlier version if something breaks. Unlike saving a file (which overwrites the previous version), git keeps every version forever.</p>
+
+<h2>Key Concepts</h2>
+<div class="callout info"><span class="emoji">ℹ️</span><div>
+<strong>Repository (repo)</strong> -- your project folder, once git is tracking it. Created with <code class="ic">git init</code>.<br><br>
+<strong>Commit</strong> -- a saved snapshot of all your files at a point in time. Each commit has a message describing what changed.<br><br>
+<strong>Stage</strong> -- marking files to be included in the next commit. <code class="ic">git add -A</code> stages everything.<br><br>
+<strong>Branch</strong> -- a parallel version of your project. The default branch is called <code class="ic">main</code>. You can create experiment branches without affecting your working version.<br><br>
+<strong>Remote</strong> -- a copy of your repo hosted online (e.g. on GitHub). Lets you back up your work and share it with others.
+</div></div>
+
+<h2>Commands Used in This Bootcamp</h2>
+<p>All git commands run in the <strong>VS Code terminal</strong> (Ctrl+` to open) -- never in Claude Code.</p>
+<table class="git-table">
+<thead><tr><th>Command</th><th>What it does</th><th>When to use it</th></tr></thead>
+<tbody>
+<tr><td class="cmd">git init</td><td class="what">Creates a new git repo in the current folder</td><td class="when">Once, at the start of Phase 1</td></tr>
+<tr><td class="cmd">git status</td><td class="what">Shows which files have changed since last commit</td><td class="when">Before every commit -- check what will be saved</td></tr>
+<tr><td class="cmd">git add -A</td><td class="what">Stages all changed files ready to commit</td><td class="when">Before git commit -- always pair these two</td></tr>
+<tr><td class="cmd">git commit -m "msg"</td><td class="what">Saves a snapshot with a description</td><td class="when">After each phase: skills, agents, final outputs</td></tr>
+<tr><td class="cmd">git log --oneline</td><td class="what">Shows commit history -- one line per commit</td><td class="when">To review progress or find a previous checkpoint</td></tr>
+<tr><td class="cmd">git diff</td><td class="what">Shows exact line-by-line changes since last commit</td><td class="when">Before committing -- see what actually changed</td></tr>
+<tr><td class="cmd">git diff HEAD~1</td><td class="what">Compares current state to the previous commit</td><td class="when">After a run -- spot what Claude changed in your files</td></tr>
+<tr><td class="cmd">git checkout -- &lt;file&gt;</td><td class="what">Discards changes to a file, restores last commit</td><td class="when">If a skill edit made things worse -- instant undo</td></tr>
+<tr><td class="cmd">git checkout -b &lt;name&gt;</td><td class="what">Creates and switches to a new branch</td><td class="when">To experiment without touching your working version</td></tr>
+<tr><td class="cmd">git checkout main</td><td class="what">Switches back to the main branch</td><td class="when">To return from an experiment branch</td></tr>
+<tr><td class="cmd">git remote add origin &lt;url&gt;</td><td class="what">Links your local repo to a GitHub repository</td><td class="when">Once, after creating a repo on GitHub</td></tr>
+<tr><td class="cmd">git push -u origin main</td><td class="what">Uploads all commits to GitHub</td><td class="when">After linking to GitHub -- backs up your work</td></tr>
+<tr><td class="cmd">git push</td><td class="what">Uploads new commits to GitHub</td><td class="when">After each commit if you want to keep GitHub in sync</td></tr>
+</tbody>
+</table>
+<div class="callout tip"><span class="emoji">💡</span><div><span class="label">Commit rhythm:</span> Initial setup → skills checkpoint (Saturday 12:35 pm) → agents checkpoint (Sunday 10:30 am) → final outputs (Sunday 11:50 am) → forward deployed (Sunday 12:30 pm). Five commits = five restore points for the entire weekend.</div></div>
+
+<h2>Backing Up to GitHub (Optional but Recommended)</h2>
+<p>GitHub is a free website that hosts git repositories online. Pushing your repo to GitHub means you have a backup, and you can share your skills and agents with colleagues by sending them the repo link. Here's how to set it up:</p>
+
+<h3>Step 1 -- Create a GitHub Account (if you don't have one)</h3>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Go to <a href="https://github.com" style="color:var(--accent)">github.com</a> and click <strong>Sign up</strong>.</div></li>
+  <li><span class="num">2</span><div class="step-body">Use your work email. Choose a username and password. Complete the verification.</div></li>
+</ul>
+
+<h3>Step 2 -- Create a New Repository on GitHub</h3>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Log in to GitHub. Click the <strong>+</strong> icon in the top-right corner and choose <strong>New repository</strong>.</div></li>
+  <li><span class="num">2</span><div class="step-body">Name it <code class="ic">ai-analyst</code> (or whatever you like).</div></li>
+  <li><span class="num">3</span><div class="step-body">Set it to <strong>Private</strong> (recommended -- keeps your work visible only to you and anyone you invite).</div></li>
+  <li><span class="num">4</span><div class="step-body">Do <strong>NOT</strong> check "Add a README" or ".gitignore" -- you already have these locally.</div></li>
+  <li><span class="num">5</span><div class="step-body">Click <strong>Create repository</strong>.</div></li>
+</ul>
+
+<h3>Step 3 -- Find Your Repository URL</h3>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">After creating the repo, GitHub shows a Quick Setup page. You will see a URL that looks like this:</div></li>
+</ul>
+<div class="code-wrap code-file"><pre>https://github.com/YOUR-USERNAME/ai-analyst.git</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<ul class="steps">
+  <li><span class="num">2</span><div class="step-body">Copy this URL. You can also find it later by going to your repo page on GitHub and clicking the green <strong>Code</strong> button -- the URL is shown under the HTTPS tab.</div></li>
+</ul>
+
+<h3>Step 4 -- Link and Push from VS Code</h3>
+<p>Run the following commands in the <strong>VS Code terminal</strong>:</p>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">Link your local repo to GitHub (paste your actual URL):</div></li>
+</ul>
+<div class="code-wrap"><pre>git remote add origin https://github.com/YOUR-USERNAME/ai-analyst.git</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<ul class="steps">
+  <li><span class="num">2</span><div class="step-body">Rename your branch to <code class="ic">main</code>. Older versions of Git name the default branch <code class="ic">master</code>, but GitHub expects <code class="ic">main</code>. This command renames it -- if it's already called <code class="ic">main</code>, it does nothing:</div></li>
+</ul>
+<div class="code-wrap"><pre>git branch -M main</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<ul class="steps">
+  <li><span class="num">3</span><div class="step-body">Push all your commits to GitHub:</div></li>
+</ul>
+<div class="code-wrap"><pre>git push -u origin main</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<ul class="steps">
+  <li><span class="num">4</span><div class="step-body">GitHub may ask you to sign in via a browser popup. Authorize VS Code and the push will complete.</div></li>
+  <li><span class="num">4</span><div class="step-body">Go to your GitHub repo page in a browser. You should see all your files -- CLAUDE.md, skills/, agents/, and the CSV data files.</div></li>
+</ul>
+<div class="callout tip"><span class="emoji">💡</span><div><span class="label">After the initial push:</span> From now on, whenever you make a commit, just run <code class="ic">git push</code> to upload it to GitHub. No need to repeat the <code class="ic">-u origin main</code> part.</div></div>
+
+<h3>Sharing with a Colleague</h3>
+<p>To give a colleague your entire working system:</p>
+<ul class="steps">
+  <li><span class="num">1</span><div class="step-body">On GitHub, go to your repo → <strong>Settings</strong> → <strong>Collaborators</strong> → <strong>Add people</strong>. Enter their GitHub username or email.</div></li>
+  <li><span class="num">2</span><div class="step-body">They clone it by running this in their terminal:</div></li>
+</ul>
+<div class="code-wrap"><pre>git clone https://github.com/YOUR-USERNAME/ai-analyst.git</pre><button class="copy-btn" title="Copy to clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+<p>They get the full repo -- CLAUDE.md, all skills, all agents -- ready to use in minutes. They just need to add the CSV data files to their local copy.</p>
+
+</section>
+
+<hr class="divider">
+
+<!-- RESOURCES -->
+<section class="section" id="resources">
+<h1>Recommended Resources</h1>
+
+<h2>Official Anthropic Learning</h2>
+<table class="res-table">
+<thead><tr><th>Resource</th><th>Link &amp; Notes</th></tr></thead>
+<tbody>
+<tr><td class="res-name">Claude Code Docs (Install)</td><td><a href="https://docs.anthropic.com/en/docs/claude-code">docs.anthropic.com/en/docs/claude-code</a><div class="res-desc">Start here — official install guide for Windows</div></td></tr>
+<tr><td class="res-name">Claude Code in Action (Course)</td><td><a href="https://anthropic.skilljar.com/claude-code-in-action">anthropic.skilljar.com/claude-code-in-action</a><div class="res-desc">Free Anthropic course — architecture, tools, multi-step tasks</div></td></tr>
+<tr><td class="res-name">Intro to Agent Skills (Course)</td><td><a href="https://anthropic.skilljar.com/introduction-to-agent-skills">anthropic.skilljar.com/introduction-to-agent-skills</a><div class="res-desc">Free Anthropic course — build, configure and share skills</div></td></tr>
+<tr><td class="res-name">Prompt Engineering Overview</td><td><a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview">docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview</a><div class="res-desc">Best practices for writing effective prompts</div></td></tr>
+<tr><td class="res-name">Official Anthropic Skills Library</td><td><a href="https://github.com/anthropics/skills">github.com/anthropics/skills</a><div class="res-desc">Pre-built skills from Anthropic — browse for inspiration</div></td></tr>
+<tr><td class="res-name">Anthropic Video Tutorials</td><td><a href="https://support.claude.com/en/collections/10548294-video-tutorials">support.claude.com/en/collections/10548294-video-tutorials</a><div class="res-desc">Short tutorial videos: Artifacts, Projects, workflows</div></td></tr>
+<tr><td class="res-name">Anthropic Courses Hub</td><td><a href="https://claude.com/resources/courses">claude.com/resources/courses</a><div class="res-desc">All structured learning paths with video lessons</div></td></tr>
+</tbody>
+</table>
+
+<h2>Setup &amp; Installation</h2>
+<table class="res-table">
+<thead><tr><th>Resource</th><th>Link &amp; Notes</th></tr></thead>
+<tbody>
+<tr><td class="res-name">Claude Code VS Code Extension</td><td><a href="https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code">marketplace.visualstudio.com — search 'Claude Code' by Anthropic</a><div class="res-desc">Official VS Code extension — 2M+ installs, verified publisher</div></td></tr>
+<tr><td class="res-name">Claude Code Windows Install Guide</td><td><a href="https://smartscope.blog/en/generative-ai/claude/claude-code-windows-native-installation/">smartscope.blog — Windows native install guide</a><div class="res-desc">Detailed Windows install + troubleshooting</div></td></tr>
+<tr><td class="res-name">VS Code Download</td><td><a href="https://code.visualstudio.com/download">code.visualstudio.com/download</a><div class="res-desc">Download VS Code for Windows if not already installed</div></td></tr>
+</tbody>
+</table>
+
+<h2>Git Resources</h2>
+<table class="res-table">
+<thead><tr><th>Resource</th><th>Link &amp; Notes</th></tr></thead>
+<tbody>
+<tr><td class="res-name">GitHub Desktop</td><td><a href="https://desktop.github.com">desktop.github.com</a><div class="res-desc">Visual git client — graphical alternative to terminal commands</div></td></tr>
+<tr><td class="res-name">Git Cheat Sheet (GitHub)</td><td><a href="https://education.github.com/git-cheat-sheet-education.pdf">education.github.com/git-cheat-sheet-education.pdf</a><div class="res-desc">One-page PDF of the most common git commands</div></td></tr>
+<tr><td class="res-name">Pro Git Book (free)</td><td><a href="https://git-scm.com/book/en/v2">git-scm.com/book/en/v2</a><div class="res-desc">The definitive git reference — Chapters 1–3 cover everything in this bootcamp</div></td></tr>
+<tr><td class="res-name">GitHub</td><td><a href="https://github.com">github.com</a><div class="res-desc">Host your ai-analyst repo here to share with colleagues or back it up</div></td></tr>
+<tr><td class="res-name">Git in VS Code</td><td><a href="https://code.visualstudio.com/docs/sourcecontrol/overview">code.visualstudio.com/docs/sourcecontrol/overview</a><div class="res-desc">VS Code has a built-in git panel — click the branch icon in the Activity Bar</div></td></tr>
+</tbody>
+</table>
+
+<h2>Sample Data &amp; Practice Datasets</h2>
+<table class="res-table">
+<thead><tr><th>Resource</th><th>Link &amp; Notes</th></tr></thead>
+<tbody>
+<tr><td class="res-name">Superstore Sales (Kaggle)</td><td><a href="https://www.kaggle.com/datasets/vivek468/superstore-dataset-final">kaggle.com/datasets/vivek468/superstore-dataset-final</a><div class="res-desc">Larger B2B-style dataset — good for extending practice beyond the bootcamp</div></td></tr>
+<tr><td class="res-name">HubSpot CRM Sample Data</td><td><a href="https://www.hubspot.com/resources">hubspot.com/resources</a><div class="res-desc">Free CRM export — closest to real GTM pipeline data</div></td></tr>
+<tr><td class="res-name">AdventureWorks (Microsoft)</td><td><a href="https://github.com/microsoft/sql-server-samples/tree/master/samples/databases/adventure-works">github.com/microsoft/sql-server-samples</a><div class="res-desc">Enterprise sales and product data — CSV format available</div></td></tr>
+</tbody>
+</table>
+
+<h2>Optional Paid</h2>
+<table class="res-table">
+<thead><tr><th>Resource</th><th>Link &amp; Notes</th></tr></thead>
+<tbody>
+<tr><td class="res-name">Maven Bootcamp ($600)</td><td><a href="https://maven.com/dataneighbor/build-ai-analysts-in-claude-code">maven.com/dataneighbor/build-ai-analysts-in-claude-code</a><div class="res-desc">8 hrs live with instructor support — same content in a guided format</div></td></tr>
+<tr><td class="res-name">Storytelling with Data (Book)</td><td><a href="https://www.storytellingwithdata.com/books">storytellingwithdata.com/books</a><div class="res-desc">Cole Nussbaumer Knaflic — the chart + narrative framework behind the skills</div></td></tr>
+<tr><td class="res-name">DataCamp</td><td><a href="https://www.datacamp.com">datacamp.com</a><div class="res-desc">Python, SQL, and data viz foundations for deeper technical grounding</div></td></tr>
+</tbody>
+</table>
+</section>
+
+<footer>
+  <p>GTM Analytics Bootcamp · v1.0 · March 2026 · Internal Use Only</p>
+</footer>
+
+</div><!-- /inner-wrap -->
+</main>
+
+<!-- Copy toast notification -->
+<div id="copy-toast">
+  <span id="toast-check">✓</span>
+  <span id="toast-msg">Copied</span>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+  // ── Sidebar toggle ──────────────────────────────────────────────────────────
+  var sidebar    = document.getElementById('sidebar');
+  var toggle     = document.getElementById('sidebar-toggle');
+  var toggleIcon = document.getElementById('toggle-icon');
+  var toggleTip  = document.getElementById('toggle-tip');
+  var mainEl     = document.getElementById('main');
+  var progressEl = document.getElementById('progress');
+  var isOpen     = true;
+
+  if (toggle) {
+    toggle.addEventListener('click', function() {
+      isOpen = !isOpen;
+      if (isOpen) {
+        sidebar.classList.remove('collapsed');
+        toggle.classList.remove('collapsed');
+        mainEl.classList.remove('centred');
+        progressEl.style.left = '240px';
+        toggleTip.textContent = 'Hide menu';
+      } else {
+        sidebar.classList.add('collapsed');
+        toggle.classList.add('collapsed');
+        mainEl.classList.add('centred');
+        progressEl.style.left = '0px';
+        toggleTip.textContent = 'Show menu';
+      }
+      // Always keep hamburger icon
+      toggleIcon.innerHTML = '&#9776;';
+    });
+  }
+
+  // ── Toast helper ────────────────────────────────────────────────────────────
+  var toast     = document.getElementById('copy-toast');
+  var toastMsg  = document.getElementById('toast-msg');
+  var toastTimer = null;
+
+  function showToast(text) {
+    var preview = text.length > 46 ? text.slice(0, 44) + '…' : text;
+    toastMsg.textContent = 'Copied  —  ' + preview;
+    clearTimeout(toastTimer);
+    toast.classList.remove('show');
+    // Force reflow so removing and re-adding the class triggers the transition
+    void toast.offsetWidth;
+    toast.classList.add('show');
+    toastTimer = setTimeout(function() {
+      toast.classList.remove('show');
+    }, 2200);
+  }
+
+  // ── Copy to clipboard ───────────────────────────────────────────────────────
+  var copyIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
+  var checkIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  function doCopy(btn, text, label) {
+    // Try modern clipboard API first, fall back to execCommand for file://
+    var copied = false;
+
+    function onSuccess() {
+      if (copied) return;
+      copied = true;
+      btn.classList.add('copied');
+      btn.innerHTML = checkIcon;
+      showToast(label);
+      setTimeout(function() {
+        btn.classList.remove('copied');
+        btn.innerHTML = copyIcon;
+      }, 2000);
+    }
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(onSuccess).catch(function() {
+        fallbackCopy(text, onSuccess);
+      });
+    } else {
+      fallbackCopy(text, onSuccess);
+    }
+  }
+
+  function fallbackCopy(text, callback) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      document.execCommand('copy');
+      callback();
+    } catch(e) {
+      alert('Copy failed. Please select the text manually and press Ctrl+C.');
+    }
+    document.body.removeChild(ta);
+  }
+
+  document.querySelectorAll('.copy-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var block   = btn.closest('.code-wrap, .prompt-box');
+      if (!block) return;
+      var el  = block.querySelector('pre') || block.querySelector('.prompt-text');
+      if (!el) return;
+      var text = el.innerText || el.textContent;
+      var firstLine = text.split('\n').find(function(l){ return l.trim(); }) || text;
+      doCopy(btn, text, firstLine.trim());
+    });
+  });
+
+  // ── Reading progress bar ────────────────────────────────────────────────────
+  window.addEventListener('scroll', function() {
+    var total = document.body.scrollHeight - window.innerHeight;
+    if (total > 0) {
+      document.getElementById('progress-bar').style.width = (window.scrollY / total * 100) + '%';
+    }
+  });
+
+  // ── Active nav highlighting ─────────────────────────────────────────────────
+  var sections = document.querySelectorAll('.section[id], #cover');
+  var navLinks = document.querySelectorAll('#sidebar nav a');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        navLinks.forEach(function(l) { l.classList.remove('active'); });
+        var active = document.querySelector('#sidebar nav a[href="#' + entry.target.id + '"]');
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.2 });
+  sections.forEach(function(s) { observer.observe(s); });
+
+});
+</script>
+</body>
+</html>

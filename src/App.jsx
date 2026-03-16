@@ -4,8 +4,10 @@ import RoadmapView from './components/RoadmapView';
 import AdminView from './components/AdminView';
 import NewRequestForm from './components/NewRequestForm';
 import VibeCodingView from './components/VibeCodingView';
+import BootcampView from './components/BootcampView';
+import MyProgressView from './components/MyProgressView';
 import AuthGate from './components/AuthGate';
-import { Moon, Sun, Plus, Bot, LogOut } from 'lucide-react';
+import { Moon, Sun, Plus, Bot, BookOpen, Gauge, LogOut } from 'lucide-react';
 import { signOut } from './auth/cognito';
 import { AuditProvider, useAuditLog } from './context/AuditContext';
 
@@ -124,6 +126,8 @@ function AppContent({ currentUser }) {
             <button onClick={() => setCurrentView('roadmap')} className={navItem('roadmap', 'Roadmap')}>Roadmap</button>
             <button onClick={() => setCurrentView('board')} className={navItem('board', 'Kanban')}>Kanban Board</button>
             <button onClick={() => setCurrentView('vibe')} className={`transition-colors pb-4 -mb-4 border-b-2 flex items-center gap-1.5 ${currentView === 'vibe' ? 'text-purple-600 border-purple-600 dark:text-purple-400' : 'border-transparent hover:text-purple-600'}`}><Bot size={15} /> Vibe Coding</button>
+            <button onClick={() => setCurrentView('bootcamp')} className={`transition-colors pb-4 -mb-4 border-b-2 flex items-center gap-1.5 ${currentView === 'bootcamp' ? 'text-emerald-600 border-emerald-600 dark:text-emerald-400' : 'border-transparent hover:text-emerald-600'}`}><BookOpen size={15} /> Bootcamp</button>
+            <button onClick={() => setCurrentView('progress')} className={`transition-colors pb-4 -mb-4 border-b-2 flex items-center gap-1.5 ${currentView === 'progress' ? 'text-cyan-600 border-cyan-600 dark:text-cyan-400' : 'border-transparent hover:text-cyan-600'}`}><Gauge size={15} /> My Progress</button>
             <button onClick={() => setCurrentView('admin')} className={navItem('admin', 'Admin')}>Admin</button>
 
             <div className="flex items-center gap-2 ml-4">
@@ -169,6 +173,8 @@ function AppContent({ currentUser }) {
             />
           )}
           {currentView === 'vibe' && <VibeCodingView />}
+          {currentView === 'bootcamp' && <BootcampView currentUser={currentUser} />}
+          {currentView === 'progress' && <MyProgressView currentUser={currentUser} onOpenGuide={(route) => setCurrentView(route)} />}
           {currentView === 'admin' && <AdminView tickets={tickets} onJumpToTicket={handleAdminJump} />}
           {currentView === 'new-request' && <NewRequestForm onSave={addTicket} onCancel={() => setCurrentView('board')} tickets={tickets} />}
         </main>

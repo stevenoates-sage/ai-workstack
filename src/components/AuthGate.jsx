@@ -23,6 +23,11 @@ const PasswordRules = () => (
 );
 
 export default function AuthGate({ children }) {
+  const isLocalBypass =
+    import.meta.env.DEV &&
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
   const [mode, setMode] = useState('loading');
   const [form, setForm] = useState(initialForm);
   const [authUser, setAuthUser] = useState(null);
@@ -33,6 +38,13 @@ export default function AuthGate({ children }) {
 
   useEffect(() => {
     let cancelled = false;
+
+    if (isLocalBypass) {
+      setMode('sign-in');
+      return () => {
+        cancelled = true;
+      };
+    }
 
     getCurrentSession()
       .then((result) => {
@@ -66,6 +78,18 @@ export default function AuthGate({ children }) {
 
     try {
       if (mode === 'sign-in') {
+        if (isLocalBypass) {
+          const fallbackEmail = 'local.dev@sage.com';
+          const email = form.username?.trim() || fallbackEmail;
+          setAuthUser({
+            username: email,
+            email,
+            name: 'Local Developer',
+          });
+          setMode('authenticated');
+          return;
+        }
+
         const result = await signIn(form.username, form.password);
         if (result.type === 'new-password-required') {
           setChallengeUser(result.user);
@@ -128,7 +152,7 @@ export default function AuthGate({ children }) {
         <div className="flex flex-1 justify-center p-6 sm:p-10">
           <div className="flex min-h-full w-full max-w-md flex-col items-center justify-between gap-6">
             <div className="w-full rounded-[24px] border border-white/10 bg-white px-6 py-8 text-slate-900 shadow-2xl sm:px-8">
-              {!authConfig.isConfigured ? (
+              {!authConfig.isConfigured && !isLocalBypass ? (
                 <div className="space-y-4">
                   <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-600">
                     <AlertCircle size={22} />
@@ -150,13 +174,21 @@ export default function AuthGate({ children }) {
                       {mode === 'new-password' ? 'Set your new password' : 'Sign in'}
                     </h2>
                     <p className="text-sm leading-6 text-slate-600">
-                      {mode === 'new-password'
+                      {isLocalBypass
+                        ? 'Localhost mode: this screen is rendered for UI testing and the button bypasses Cognito.'
+                        : mode === 'new-password'
                         ? 'This is your first login. Update the temporary password to activate your account.'
                         : 'Use your Sage email address and temporary password from Cognito.'}
                     </p>
                   </div>
 
                   <form className="space-y-4" onSubmit={handleSubmit}>
+                  {isLocalBypass && mode === 'sign-in' && (
+                    <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+                      Cognito bypass is enabled on localhost only.
+                    </div>
+                  )}
+
                   {mode === 'sign-in' && (
                     <>
                       <label className="block space-y-1.5">
@@ -179,6 +211,7 @@ export default function AuthGate({ children }) {
                           placeholder="Enter your password"
                           type="password"
                           value={form.password}
+                          disabled={isLocalBypass}
                         />
                       </label>
                     </>
@@ -227,7 +260,13 @@ export default function AuthGate({ children }) {
                       type="submit"
                     >
                       {isSubmitting ? <LoaderCircle className="animate-spin" size={16} /> : mode === 'new-password' ? <ArrowRight size={16} /> : <LogIn size={16} />}
-                      {isSubmitting ? 'Working...' : mode === 'new-password' ? 'Save new password' : 'Sign in'}
+                      {isSubmitting
+                        ? 'Working...'
+                        : mode === 'new-password'
+                        ? 'Save new password'
+                        : isLocalBypass
+                        ? 'Login (localhost bypass)'
+                        : 'Sign in'}
                     </button>
                   </form>
                 </>

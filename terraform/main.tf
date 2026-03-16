@@ -84,6 +84,15 @@ locals {
     "steve.oates@sage.com" = {
       name = "Steve Oates"
     }
+    "sahil.grewal@sage.com" = {
+      name = "Sahil Grewal"
+    }
+    "chris.grimsley@sage.com" = {
+      name = "Chris Grimsley"
+    }
+    "amy.manriquez@sage.com" = {
+      name = "Amy Manriquez"
+    }
     "rory.howells@sage.com" = {
       name = "Rory Howells"
     }
