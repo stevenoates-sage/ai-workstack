@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import HeroImage from '../assets/Daedalus Hammer Picture.png';
+import HeroImage from '../assets/Olympus.png';
+import DaedalusImage from '../assets/Daedalus Hammer Picture.png';
 import IntroVideo from '../assets/Powered By SIGMA Daedalus.mp4';
 import OdysseyIcon from '../assets/Icons/Odyssey Path Icon.png';
 import AnvilIcon from '../assets/Icons/The Anvil Icon.png';
@@ -10,7 +11,7 @@ import IdeaButton from '../assets/Icons/Idea Button.png';
 const homeTiles = [
   {
     id: 'roadmap',
-    title: 'The Odyssey Path',
+    title: 'The Olympus Path',
     realName: 'Roadmap',
     icon: OdysseyIcon,
     blurb: 'Strategic view of requests, themes, and delivery sequencing.',
@@ -90,10 +91,11 @@ export default function HomeView({ onNavigate }) {
         <section className="mx-auto max-w-7xl">
           <div className="grid gap-6 lg:grid-cols-[1.35fr_0.95fr]">
             <div className="relative overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-              <img src={HeroImage} alt="Daedalus Hammer" className="h-full w-full object-cover" />
+              <img src={HeroImage} alt="Olympus" className="h-full w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 p-6 text-white">
-                <h2 className="text-3xl font-bold tracking-tight">RevOps Innovation Hub</h2>
+                <h2 className="text-3xl font-bold tracking-tight">Olympus</h2>
+                <p className="mt-1 text-sm font-semibold text-emerald-200">RevOps Innovation Hub</p>
                 <p className="mt-2 max-w-2xl text-sm text-gray-100">
                   Navigate strategy, execution, learning, and social collaboration from a single command center.
                 </p>
@@ -136,27 +138,35 @@ export default function HomeView({ onNavigate }) {
           </div>
         </section>
 
-        <section className="mx-auto max-w-3xl rounded-3xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <div className="relative">
-            <video
-              ref={videoRef}
-              className="h-full min-h-[180px] w-full rounded-2xl border border-gray-200 bg-black object-cover dark:border-gray-600"
-              autoPlay
-              playsInline
-              preload="auto"
-              disablePictureInPicture
-            >
-              <source src={IntroVideo} type="video/mp4" />
-            </video>
-            {needsSoundAction && (
-              <button
-                type="button"
-                onClick={enableSound}
-                className="absolute bottom-3 right-3 rounded-lg bg-black/75 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-black/85"
-              >
-                Enable sound
-              </button>
-            )}
+        <section className="mx-auto max-w-7xl">
+          <div className="grid gap-6 lg:grid-cols-[1.35fr_0.95fr]">
+            <div className="rounded-3xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+              <div className="relative">
+                <video
+                  ref={videoRef}
+                  className="h-full min-h-[180px] w-full rounded-2xl border border-gray-200 bg-black object-cover dark:border-gray-600"
+                  autoPlay
+                  playsInline
+                  preload="auto"
+                  disablePictureInPicture
+                >
+                  <source src={IntroVideo} type="video/mp4" />
+                </video>
+                {needsSoundAction && (
+                  <button
+                    type="button"
+                    onClick={enableSound}
+                    className="absolute bottom-3 right-3 rounded-lg bg-black/75 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-black/85"
+                  >
+                    Enable sound
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+              <img src={DaedalusImage} alt="Daedalus" className="h-full min-h-[212px] w-full object-cover" />
+            </div>
           </div>
         </section>
       </div>

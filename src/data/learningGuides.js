@@ -1,8 +1,8 @@
 export const LEARNING_GUIDES = [
   {
     id: 'weekend-bootcamp-v1',
-    title: 'AI Analyst Weekend Bootcamp',
-    description: 'Weekend training guide with synthetic GTM datasets.',
+    title: 'Claude Gladiator',
+    description: 'Claude Gladiator training with synthetic GTM datasets.',
     route: 'bootcamp',
     guideUrl: '/bootcamp/AI_Analyst_Weekend_Bootcamp.html',
     files: [

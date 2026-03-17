@@ -1,6 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LEARNING_GUIDES } from '../data/learningGuides';
-import { getAllGuideProgressForUser } from '../utils/progressStore';
+import { getAllGuideProgressForUser, setGuideProgress } from '../utils/progressStore';
+import GitHubWingsBadge from '../assets/Icons/GitHub Wings Badge.png';
+import SnowflakeWarriorBadge from '../assets/Icons/Snowflake Warrior.png';
+import ClaudeGladiatorBadge from '../assets/Icons/Claude Gladiator.png';
+
+const GITHUB_WINGS_ID = 'prereq-github-wings';
+const SNOWFLAKE_WARRIOR_ID = 'prereq-snowflake-warrior';
+const VIBE_CODING_ID = 'vibe-coding-track';
 
 const formatDate = (value) => {
   if (!value) return 'Never';
@@ -10,7 +17,51 @@ const formatDate = (value) => {
 };
 
 export default function ForgeView({ currentUser, onOpenView }) {
+  const [, setRefreshKey] = useState(0);
   const guideProgress = getAllGuideProgressForUser(currentUser);
+  const bootcampGuide = LEARNING_GUIDES.find((guide) => guide.route === 'bootcamp');
+
+  const githubWingsPercent = guideProgress[GITHUB_WINGS_ID]?.percent || 0;
+  const snowflakeWarriorPercent = guideProgress[SNOWFLAKE_WARRIOR_ID]?.percent || 0;
+  const bootcampPercent = bootcampGuide ? guideProgress[bootcampGuide.id]?.percent || 0 : 0;
+  const vibeCodingPercent = guideProgress[VIBE_CODING_ID]?.percent || 0;
+  const bootcampUnlocked = githubWingsPercent >= 100;
+
+  const githubWingsDate = guideProgress[GITHUB_WINGS_ID]?.updatedAt;
+  const snowflakeWarriorDate = guideProgress[SNOWFLAKE_WARRIOR_ID]?.updatedAt;
+  const claudeGladiatorDate = bootcampGuide ? guideProgress[bootcampGuide.id]?.updatedAt : null;
+
+  const heroBadges = [
+    {
+      id: GITHUB_WINGS_ID,
+      title: 'GitHub Wings',
+      image: GitHubWingsBadge,
+      percent: githubWingsPercent,
+      updatedAt: githubWingsDate,
+    },
+    {
+      id: SNOWFLAKE_WARRIOR_ID,
+      title: 'Snowflake Warrior',
+      image: SnowflakeWarriorBadge,
+      percent: snowflakeWarriorPercent,
+      updatedAt: snowflakeWarriorDate,
+    },
+    {
+      id: 'claude-gladiator',
+      title: 'Claude Gladiator',
+      image: ClaudeGladiatorBadge,
+      percent: bootcampPercent,
+      updatedAt: claudeGladiatorDate,
+    },
+  ];
+
+  const setPrereqStatus = (guideId, completed) => {
+    setGuideProgress(currentUser, guideId, {
+      percent: completed ? 100 : 0,
+      completed,
+    });
+    setRefreshKey((value) => value + 1);
+  };
 
   return (
     <div className="h-full overflow-y-auto bg-gray-100 p-6 dark:bg-gray-900">
@@ -19,52 +70,136 @@ export default function ForgeView({ currentUser, onOpenView }) {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">The Forge</h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">A practice area for guided learning, experimentation, and progress tracking.</p>
 
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <button
-              onClick={() => onOpenView('bootcamp')}
-              type="button"
-              className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-left transition hover:border-blue-300 hover:bg-blue-50 dark:border-gray-600 dark:bg-gray-700/40 dark:hover:border-blue-500 dark:hover:bg-gray-700"
-            >
-              <div className="text-sm font-semibold text-gray-900 dark:text-white">Open Bootcamp</div>
-              <div className="mt-1 text-xs text-gray-600 dark:text-gray-300">Launch the AI Analyst Weekend Bootcamp.</div>
-            </button>
+          <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 dark:border-amber-700/50 dark:bg-amber-900/20">
+            <h3 className="text-sm font-bold uppercase tracking-wide text-amber-800 dark:text-amber-300">Prerequisites</h3>
+            <div className="mt-3 space-y-3">
+              <article className="rounded-2xl border border-amber-200 bg-white p-4 dark:border-amber-700/50 dark:bg-gray-800/60">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900 dark:text-white">Get Your GitHub Wings</div>
+                    <div className="mt-1 text-xs text-gray-600 dark:text-gray-300">Required before Bootcamp access is enabled.</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => onOpenView('github-wings')}
+                      type="button"
+                      className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700"
+                    >
+                      Open
+                    </button>
+                    <button
+                      onClick={() => setPrereqStatus(GITHUB_WINGS_ID, githubWingsPercent < 100)}
+                      type="button"
+                      className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-amber-700"
+                    >
+                      {githubWingsPercent >= 100 ? 'Mark incomplete' : 'Mark complete'}
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-3 h-2.5 w-full rounded-full bg-amber-100 dark:bg-amber-900/40">
+                  <div className="h-2.5 rounded-full bg-amber-600" style={{ width: `${githubWingsPercent}%` }} />
+                </div>
+                <div className="mt-1 text-xs font-semibold text-amber-800 dark:text-amber-300">{githubWingsPercent}% complete</div>
+              </article>
 
-            <button
-              onClick={() => onOpenView('vibe')}
-              type="button"
-              className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-left transition hover:border-blue-300 hover:bg-blue-50 dark:border-gray-600 dark:bg-gray-700/40 dark:hover:border-blue-500 dark:hover:bg-gray-700"
-            >
-              <div className="text-sm font-semibold text-gray-900 dark:text-white">Open Vibe Coding</div>
-              <div className="mt-1 text-xs text-gray-600 dark:text-gray-300">Jump into the Vibe Coding workspace.</div>
-            </button>
+              <article className="rounded-2xl border border-amber-200 bg-white p-4 dark:border-amber-700/50 dark:bg-gray-800/60">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900 dark:text-white">Snowflake Warrior</div>
+                    <div className="mt-1 text-xs text-gray-600 dark:text-gray-300">Optional prerequisite. Recommended but not required for Bootcamp.</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => onOpenView('snowflake-warrior')}
+                      type="button"
+                      className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700"
+                    >
+                      Open
+                    </button>
+                    <button
+                      onClick={() => setPrereqStatus(SNOWFLAKE_WARRIOR_ID, snowflakeWarriorPercent < 100)}
+                      type="button"
+                      className="rounded-lg bg-slate-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-800"
+                    >
+                      {snowflakeWarriorPercent >= 100 ? 'Mark incomplete' : 'Mark complete'}
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-3 h-2.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                  <div className="h-2.5 rounded-full bg-slate-700" style={{ width: `${snowflakeWarriorPercent}%` }} />
+                </div>
+                <div className="mt-1 text-xs font-semibold text-gray-700 dark:text-gray-200">{snowflakeWarriorPercent}% complete</div>
+              </article>
+            </div>
+          </div>
+
+          <div className="mt-5 space-y-3">
+            <article className="rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-700/40">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-sm font-semibold text-gray-900 dark:text-white">Claude Gladiator</div>
+                  <div className="mt-1 text-xs text-gray-600 dark:text-gray-300">Launch the Claude Gladiator training.</div>
+                </div>
+                <button
+                  onClick={() => onOpenView('bootcamp')}
+                  type="button"
+                  disabled={!bootcampUnlocked}
+                  className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
+                >
+                  {bootcampUnlocked ? 'Open' : 'Locked'}
+                </button>
+              </div>
+              {!bootcampUnlocked && (
+                <div className="mt-2 text-xs font-medium text-amber-700 dark:text-amber-300">Complete Get Your GitHub Wings to unlock Bootcamp.</div>
+              )}
+              <div className="mt-3 h-2.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                <div className="h-2.5 rounded-full bg-blue-600" style={{ width: `${bootcampPercent}%` }} />
+              </div>
+              <div className="mt-1 text-xs font-semibold text-gray-700 dark:text-gray-200">{bootcampPercent}% complete</div>
+            </article>
+
+            <article className="rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-700/40">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-sm font-semibold text-gray-900 dark:text-white">Get Started with Vibe Coding</div>
+                  <div className="mt-1 text-xs text-gray-600 dark:text-gray-300">Jump into the Vibe Coding workspace.</div>
+                </div>
+                <button
+                  onClick={() => onOpenView('vibe')}
+                  type="button"
+                  className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700"
+                >
+                  Open
+                </button>
+              </div>
+              <div className="mt-3 h-2.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                <div className="h-2.5 rounded-full bg-blue-600" style={{ width: `${vibeCodingPercent}%` }} />
+              </div>
+              <div className="mt-1 text-xs font-semibold text-gray-700 dark:text-gray-200">{vibeCodingPercent}% complete</div>
+            </article>
           </div>
         </section>
 
         <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">My Progress</h3>
-          <div className="mt-4 space-y-3">
-            {LEARNING_GUIDES.map((guide) => {
-              const progress = guideProgress[guide.id] || {};
-              const percent = progress.percent || 0;
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Hero Progress</h3>
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            {heroBadges.map((badge) => {
+              const achieved = badge.percent >= 100;
               return (
-                <article key={guide.id} className="rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-700/40">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <div className="text-sm font-semibold text-gray-900 dark:text-white">{guide.title}</div>
-                      <div className="mt-1 text-xs text-gray-600 dark:text-gray-300">Last saved: {formatDate(progress.updatedAt)}</div>
-                    </div>
-                    <button
-                      onClick={() => onOpenView(guide.route)}
-                      type="button"
-                      className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700"
-                    >
-                      Continue
-                    </button>
+                <article key={badge.id} className="rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-700/40">
+                  <div className="text-sm font-semibold text-gray-900 dark:text-white">{badge.title}</div>
+                  <img
+                    src={badge.image}
+                    alt={badge.title}
+                    className={`mt-3 h-40 w-full rounded-xl object-contain ${achieved ? '' : 'grayscale opacity-50'}`}
+                  />
+                  <div className="mt-2 text-xs font-semibold text-gray-700 dark:text-gray-200">
+                    {achieved ? `Achieved ${formatDate(badge.updatedAt)}` : 'Locked'}
                   </div>
                   <div className="mt-3 h-2.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-                    <div className="h-2.5 rounded-full bg-blue-600" style={{ width: `${percent}%` }} />
+                    <div className="h-2.5 rounded-full bg-blue-600" style={{ width: `${badge.percent}%` }} />
                   </div>
-                  <div className="mt-1 text-xs font-semibold text-gray-700 dark:text-gray-200">{percent}% complete</div>
+                  <div className="mt-1 text-xs font-semibold text-gray-700 dark:text-gray-200">{badge.percent}% complete</div>
                 </article>
               );
             })}

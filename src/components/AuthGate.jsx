@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AlertCircle, ArrowRight, KeyRound, LoaderCircle, LockKeyhole, LogIn } from 'lucide-react';
 import LogoLight from '../assets/Power by SIGMA - white letters.svg';
+import OlympusImage from '../assets/Olympus.png';
 import { authConfig, completeNewPassword, getCurrentSession, signIn } from '../auth/cognito';
 
 const initialForm = {
@@ -126,11 +127,15 @@ export default function AuthGate({ children }) {
         <div className="hidden w-[46%] flex-col justify-between border-r border-white/10 bg-white/5 p-10 lg:flex">
           <div className="space-y-10">
             <div className="space-y-5">
-              <div>
-                <h1 className="max-w-md text-4xl font-black tracking-tight text-white">RevOps Innovation Hub</h1>
-                <p className="mt-4 max-w-md text-sm leading-6 text-slate-300">
-                  Sign in with your Sage email to review roadmap priorities, feed new requirements, and manage AI delivery work in one place.
-                </p>
+              <div className="relative overflow-hidden rounded-2xl border border-white/10">
+                <img src={OlympusImage} alt="Olympus" className="h-64 w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/45 to-transparent" />
+                <div className="absolute bottom-0 left-0 p-5">
+                  <h1 className="max-w-md text-4xl font-black tracking-tight text-white">RevOps Innovation Hub</h1>
+                  <p className="mt-3 max-w-md text-sm leading-6 text-slate-100">
+                    Sign in with your Sage email to review roadmap priorities, feed new requirements, and manage AI delivery work in one place.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -138,7 +143,8 @@ export default function AuthGate({ children }) {
           <div className="grid gap-4">
             {[
               ['Roadmap visibility', 'Track approved POCs, engineering queue, and active delivery across the portfolio.'],
-              ['Rory input channel', 'Add requests directly into the hub without touching source files or Terraform.'],
+              ['Summon ideas fast', 'Raise new AI use cases quickly from the home experience and route them straight into the backlog.'],
+              ['Execution focus', 'Use The Anvil and The Olympus Path together to move from request intake to active delivery with clear ownership.'],
               ['Protected access', 'Only approved Cognito accounts can open the workspace once auth is enforced.'],
             ].map(([title, description]) => (
               <div key={title} className="rounded-2xl border border-white/10 bg-white/5 p-4">

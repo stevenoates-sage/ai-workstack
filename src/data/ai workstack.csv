@@ -1,0 +1,28 @@
+Status,Category,App / Project,Task,Description,Who,start date,end date
+Complete,,Echo,Reasons QDC Not Approved,Explain reason QDC did not convert,Dav,05/01/2026,30/01/2026
+Engineering - In Progress,,Echo,VAR - Push,Explain reason QDC pushed to VAR,Dav,09/03/2026,18/03/2026
+Complete,,Echo,VAR - Push Requirements,Requiremenets for the VAR - Push engineering,Izzy,23/02/2026,27/02/2026
+Complete,,Echo,Infrastructure Setup,AWS Setup & Connectivity to Snowflake,Dav,02/02/2026,27/02/2026
+Complete,,Echo,Reason extraction Process,AI Confiuguration to analyse outcome reasoning,Dav,02/02/2026,20/02/2026
+Complete,,Echo,Prompt Refinement,Re-terative prompt engineering to refine outputs,Dav,02/02/2026,20/02/2026
+Complete,,Echo,App Migration,Move app across AWS environments,Dav,05/01/2026,30/01/2026
+Complete,,Echo,ERP Analysis,"Logic creation to determine the previous ERP, ask from Derk.","Dav, Steve & Rory",12/01/2026,30/01/2026
+Complete,,Echo,Echo UAT,Continuous feedback loop on changes and improvements,Rory & Dav,05/01/2026,13/03/2026
+Complete,,Daedalus,Visual mock up in Claude,using claude to create a UI and dtermione which metrics to show and visual layout,Chris,28/01/2026,03/02/2026
+Complete,,Daedalus,"NCA MQL, SQL, QDC, SQO data Development","Create new data pipe lines to feed Daedalus with specific metric logic, semi-aggregated",Steve,02/02/2026,06/02/2026
+Complete,,Daedalus,"MQL Refinement, pipeline and targets",6 new datapipelines for daedalus,Steve,09/02/2026,13/02/2026
+Waiting Engineering,,Daedalus,Performance vs Plan,Explain performance vs targets,Rory,20/03/2026,01/04/2026
+Engineering - In Progress,,Daedalus,Performance Trend-Pattern-Insights,explain drivers of performance vs target,Rory,20/03/2026,01/04/2026
+Complete,,Daedalus,MQL Requirements,Prakash to document MQL fields and additional requirements,Prakash,14/03/2026,16/03/2026
+Engineering - In Progress,,Daedalus,MQL Logic Implemntation,Implemenbt the changes and additional fields Prakash asked for.,Steve,18/03/2026,19/03/2026
+Waiting Engineering,,Daedalus,MQL Visuals / Outputs,"Once data in Daedalus, decide on what the visuals and analyses should be",Prakash & Rory,19/03/2026,20/03/2026
+Waiting Engineering,,Daedalus,Pipeline Requirements,document visual and output requirements for the pipeline data,Rory,20/03/2026,25/03/2026
+POC In-Flight,,Daedalus,In-Life,Pearl to determine initial use cases and provice POC output. Churn Predicator model,Pearl,02/03/2026,27/03/2026
+POC In-Flight,,Daedalus,Add Ons,Add On requiremenets and mock output,Pearl,02/03/2026,27/03/2026
+POC In-Flight,,Daedalus,In-Life,AWS development of churn prediction & add ons,Krish,23/03/2006,01/05/2026
+Waiting Engineering,,Poseidon,Document requirements for deep analytics,tool to create custom views & insights,Rory,15/04/2026,01/05/2026
+Waiting Engineering,,Apollo,Document requirements for predictive NCA Insights,Prediction of NCA bookings based on pipeline,Rory,15/04/2026,01/05/2026
+Complete,,Prometheus,Enable Streamlit,create a process and new role to allow uers access to streamlit in sandbox,Steve,04/03/2026,16/03/2026
+POC In-Flight,,Prometheus,Build an NCA model end-to-end in an app-like environment ,Using AI to build the model and look at forecasting,Joao,17/03/2026,01/05/2026
+POC In-Flight,,Prometheus,"generate comments/insights for the Global Scorecard deck,",AI insights for the scorecard reducing manual effort,Joao,16/03/2026,31/03/2026
+New Request,,TBC,News Scraping Agent,"this is super basic I think: we can setup an agent too scrape the news / industry publications for certain competitors, get it to compile a brief and share weekly with specific formatting -- I can share my prompt it was super basic -- goes to show the value of things we likely think are pretty straight forward... remember:",Dom,,

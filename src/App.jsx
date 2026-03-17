@@ -6,6 +6,8 @@ import NewRequestForm from './components/NewRequestForm';
 import VibeCodingView from './components/VibeCodingView';
 import BootcampView from './components/BootcampView';
 import MyProgressView from './components/MyProgressView';
+import GitHubWingsView from './components/GitHubWingsView';
+import SnowflakeWarriorView from './components/SnowflakeWarriorView';
 import HomeView from './components/HomeView';
 import ForgeView from './components/ForgeView';
 import ColleseumView from './components/ColleseumView';
@@ -13,8 +15,9 @@ import AuthGate from './components/AuthGate';
 import { Moon, Sun, LogOut } from 'lucide-react';
 import { signOut } from './auth/cognito';
 import { AuditProvider, useAuditLog } from './context/AuditContext';
+import workstackCsv from './data/ai workstack.csv?raw';
 
-import HammerIcon from './assets/Icons/Daedalus Hammer Icon.png';
+import OlympusBrandIcon from './assets/Icons/Olympus Icon.png';
 import OdysseyIcon from './assets/Icons/Odyssey Path Icon.png';
 import AnvilIcon from './assets/Icons/The Anvil Icon.png';
 import ForgeIcon from './assets/Icons/The Forge Icon.png';
@@ -25,12 +28,126 @@ import LogoLight from './assets/Power by SIGMA - white letters.svg';
 import LogoDark from './assets/Power by SIGMA v2 - black letters.svg';
 
 export const USERS = [
-  'Steve O',
+  'Steve',
   'Chris',
   'Dav',
   'Pearl',
   'Krish'
 ];
+
+const mapCsvStatusToBoardStatus = (status) => {
+  if (status === 'POC In-Flight') return 'POC In Flight';
+  if (status === 'Engineering - In Progress') return 'In Progress';
+  return status || 'New Request';
+};
+
+const parseCsvLine = (line) => {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i];
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+    if (char === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+      continue;
+    }
+    current += char;
+  }
+
+  result.push(current.trim());
+  return result;
+};
+
+const toIsoDate = (dateString) => {
+  if (!dateString) return '';
+  const [day, month, year] = dateString.split('/').map((part) => Number(part));
+  if (!day || !month || !year) return '';
+  const date = new Date(year, month - 1, day);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toISOString().split('T')[0];
+};
+
+const getBusinessDayCount = (startDate, endDate) => {
+  if (!startDate || !endDate) return 0;
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 0;
+  if (end < start) return 0;
+
+  let count = 0;
+  const current = new Date(start);
+  while (current <= end) {
+    const day = current.getDay();
+    if (day !== 0 && day !== 6) count += 1;
+    current.setDate(current.getDate() + 1);
+  }
+  return count;
+};
+
+const getTShirtFromDuration = (startDate, endDate) => {
+  const businessDays = getBusinessDayCount(startDate, endDate);
+  if (businessDays < 1) return 'XS';
+  if (businessDays <= 4) return 'S';
+  if (businessDays <= 10) return 'M';
+  if (businessDays <= 20) return 'L';
+  return 'XL';
+};
+
+const loadTicketsFromCsv = () => {
+  const lines = workstackCsv.split(/\r?\n/).filter((line) => line.trim().length > 0);
+  if (lines.length <= 1) return [];
+
+  const headers = parseCsvLine(lines[0]);
+
+  return lines.slice(1).map((line, idx) => {
+    const values = parseCsvLine(line);
+    const row = {};
+    headers.forEach((header, headerIdx) => {
+      row[header] = values[headerIdx] || '';
+    });
+
+    const rawProject = (row['App / Project'] || '').trim();
+    const isTbcProject = !rawProject || rawProject.toUpperCase() === 'TBC';
+    const project = isTbcProject ? '' : rawProject;
+    const task = row.Task || `Ticket ${idx + 1}`;
+    const normalizedStatus = isTbcProject ? 'New Request' : mapCsvStatusToBoardStatus(row.Status);
+    const startDate = toIsoDate(row['start date']);
+    const endDate = toIsoDate(row['end date']);
+    const assignedTo = normalizedStatus === 'New Request' ? 'Unassigned' : (row.Who || 'Unassigned');
+    const tShirt = getTShirtFromDuration(startDate, endDate);
+
+    return {
+      id: `csv-${idx + 1}`,
+      Ref: `AI-${String(idx + 1).padStart(3, '0')}`,
+      Type: 'POC',
+      Title: task,
+      AssignedTo: assignedTo,
+      StartDate: startDate,
+      EndDate: endDate,
+      Capacity: normalizedStatus === 'New Request' ? 0 : 50,
+      Status: normalizedStatus,
+      Priority: normalizedStatus === 'New Request' ? 'Unprioritised' : 'Medium',
+      RaisedBy: assignedTo === 'Unassigned' ? 'Unknown' : assignedTo,
+      DateAdded: startDate || new Date().toISOString().split('T')[0],
+      Description: row.Description || 'No description provided.',
+      BusinessValue: project ? `${project} program` : 'New request backlog',
+      TShirt: tShirt,
+      Project: project,
+      NotesHistory: [],
+    };
+  });
+};
 
 const INITIAL_TICKETS = [
   { id: 'AI001', Ref: 'AI-001', Type: 'POC', Title: 'Reasons QDC Not Approved Agent', AssignedTo: 'Unassigned', StartDate: '2026-03-16', EndDate: '2026-04-10', Capacity: 80, Status: 'POC In Flight', Priority: 'High', RaisedBy: 'Rory', DateAdded: '2026-03-13', Description: 'Agent to explain why QDCs were not approved, with drill-down by segment and owner.', BusinessValue: 'Faster root-cause analysis for rejected opportunities.', TShirt: 'L', NotesHistory: [] },
@@ -75,7 +192,10 @@ const addBusinessDays = (dateStr, daysToAdd) => {
 function AppContent({ currentUser }) {
   const [darkMode, setDarkMode] = useState(true);
   const [currentView, setCurrentView] = useState('home');
-  const [tickets, setTickets] = useState(INITIAL_TICKETS);
+  const [tickets, setTickets] = useState(() => {
+    const csvTickets = loadTicketsFromCsv();
+    return csvTickets.length > 0 ? csvTickets : INITIAL_TICKETS;
+  });
   const [adminSelectedTicketId, setAdminSelectedTicketId] = useState(null);
   const { addLog } = useAuditLog();
 
@@ -127,16 +247,19 @@ function AppContent({ currentUser }) {
 
         <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-10 shadow-sm dark:bg-gray-800 dark:border-gray-700">
           <div className="flex items-center gap-4">
-            <img src={HammerIcon} alt="RevOps Hub" className="h-14 w-14 rounded-xl object-contain"/>
+            <img src={OlympusBrandIcon} alt="Olympus" className="h-14 w-14 rounded-xl object-contain"/>
             <div className="h-10 w-px bg-gray-300 dark:bg-gray-600"></div>
-            <h1 className="text-xl font-bold tracking-tight text-gray-800 dark:text-white">RevOps Innovation Hub</h1>
+            <div className="leading-tight">
+              <h1 className="text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">Olympus</h1>
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">RevOps Innovation Hub</p>
+            </div>
             <div className="h-10 w-px bg-gray-300 dark:bg-gray-600"></div>
             <img src={darkMode ? LogoLight : LogoDark} alt="Powered by SIGMA" className="h-10 w-auto object-contain"/>
           </div>
 
           <nav className="flex items-center gap-4 text-xs font-semibold text-gray-600 dark:text-gray-300">
-            <button onClick={() => setCurrentView('home')} className={`transition-colors pb-2 -mb-2 border-b-2 inline-flex items-center gap-1.5 ${currentView === 'home' ? 'text-blue-600 border-blue-600 dark:text-blue-400' : 'border-transparent hover:text-blue-600'}`}><img src={HammerIcon} alt="" className="h-7 w-7 object-contain"/><span>Home</span></button>
-            <button onClick={() => setCurrentView('roadmap')} className={`transition-colors pb-2 -mb-2 border-b-2 inline-flex items-center gap-1.5 ${currentView === 'roadmap' ? 'text-blue-600 border-blue-600 dark:text-blue-400' : 'border-transparent hover:text-blue-600'}`}><img src={OdysseyIcon} alt="" className="h-7 w-7 object-contain"/><span>The Odyssey Path</span></button>
+            <button onClick={() => setCurrentView('home')} className={`transition-colors pb-2 -mb-2 border-b-2 inline-flex items-center gap-1.5 ${currentView === 'home' ? 'text-blue-600 border-blue-600 dark:text-blue-400' : 'border-transparent hover:text-blue-600'}`}><img src={OlympusBrandIcon} alt="" className="h-7 w-7 object-contain"/><span>Home</span></button>
+            <button onClick={() => setCurrentView('roadmap')} className={`transition-colors pb-2 -mb-2 border-b-2 inline-flex items-center gap-1.5 ${currentView === 'roadmap' ? 'text-blue-600 border-blue-600 dark:text-blue-400' : 'border-transparent hover:text-blue-600'}`}><img src={OdysseyIcon} alt="" className="h-7 w-7 object-contain"/><span>The Olympus Path</span></button>
             <button onClick={() => setCurrentView('board')} className={`transition-colors pb-2 -mb-2 border-b-2 inline-flex items-center gap-1.5 ${currentView === 'board' ? 'text-amber-600 border-amber-600 dark:text-amber-400' : 'border-transparent hover:text-amber-600'}`}><img src={AnvilIcon} alt="" className="h-7 w-7 object-contain"/><span>The Anvil</span></button>
             <button onClick={() => setCurrentView('forge')} className={`transition-colors pb-2 -mb-2 border-b-2 inline-flex items-center gap-1.5 ${currentView === 'forge' ? 'text-emerald-600 border-emerald-600 dark:text-emerald-400' : 'border-transparent hover:text-emerald-600'}`}><img src={ForgeIcon} alt="" className="h-7 w-7 object-contain"/><span>The Forge</span></button>
             <button onClick={() => setCurrentView('colleseum')} className={`transition-colors pb-2 -mb-2 border-b-2 inline-flex items-center gap-1.5 ${currentView === 'colleseum' ? 'text-rose-600 border-rose-600 dark:text-rose-400' : 'border-transparent hover:text-rose-600'}`}><img src={ColleseumIcon} alt="" className="h-7 w-7 object-contain"/><span>The Colleseum</span></button>
@@ -195,6 +318,8 @@ function AppContent({ currentUser }) {
           {currentView === 'new-request' && <NewRequestForm onSave={addTicket} onCancel={() => setCurrentView('board')} tickets={tickets} />}
           {currentView === 'vibe' && <VibeCodingView />}
           {currentView === 'bootcamp' && <BootcampView currentUser={currentUser} />}
+          {currentView === 'github-wings' && <GitHubWingsView onBack={() => setCurrentView('forge')} />}
+          {currentView === 'snowflake-warrior' && <SnowflakeWarriorView onBack={() => setCurrentView('forge')} />}
           {currentView === 'progress' && <MyProgressView currentUser={currentUser} onOpenGuide={(route) => setCurrentView(route)} />}
         </main>
       </div>
