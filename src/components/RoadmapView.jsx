@@ -20,11 +20,11 @@ const GOD_PROGRAMS = {
 };
 
 const GOD_DESCRIPTIONS = {
-  Daedalus: 'performance',
-  Echo: 'Chorus data',
-  Poseidon: 'deep dive',
-  Apollo: 'He is the ruler of the Oracle and has total dominion over the future and visions.',
-  Prometheus: 'planning',
+  Echo: 'Ensuring that every signal sent into the deep layers of Chorus resonates back with clarity and precision.',
+  Daedalus: 'The ultimate architect of complex systems, responsible for designing the intricate, multi-layered logic and structural integrity of the Labryrinth.',
+  Poseidon: 'The guardian of the Deep Sea, overseeing the complex, underlying structures that most never see.',
+  Apollo: 'The ruler of the Oracle and has total dominion over the future and visions.',
+  Prometheus: 'The ultimate strategist who sees what is coming and plans accordingly.',
 };
 
 const PROJECT_ICONS = {
@@ -705,10 +705,19 @@ const RoadmapView = ({ tickets, onUpdateTicket, onRejectTicket, externalSelected
             <div className="mt-4 space-y-4">
               {projectGroups.map((project) => (
                 <article key={project.name} className="rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-700/40">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      {PROJECT_ICONS[project.name] && (
+                        <img
+                          src={PROJECT_ICONS[project.name]}
+                          alt={project.name}
+                          className="h-16 w-16 shrink-0 rounded-xl object-contain"
+                        />
+                      )}
+                      <div>
                       <div className="text-base font-semibold text-gray-900 dark:text-white">{project.name} - {project.godDescription}</div>
                       <div className="text-xs uppercase tracking-wide text-blue-700 dark:text-blue-300">{project.program}</div>
+                      </div>
                     </div>
                     <div className="text-xs text-gray-600 dark:text-gray-300">{dateText(project.startDate)} - {dateText(project.endDate)}</div>
                   </div>
