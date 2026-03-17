@@ -8,6 +8,7 @@ import BootcampView from './components/BootcampView';
 import MyProgressView from './components/MyProgressView';
 import GitHubWingsView from './components/GitHubWingsView';
 import SnowflakeWarriorView from './components/SnowflakeWarriorView';
+import VSCodeShipyardView from './components/VSCodeShipyardView';
 import HomeView from './components/HomeView';
 import ForgeView from './components/ForgeView';
 import ColleseumView from './components/ColleseumView';
@@ -318,8 +319,9 @@ function AppContent({ currentUser }) {
           {currentView === 'new-request' && <NewRequestForm onSave={addTicket} onCancel={() => setCurrentView('board')} tickets={tickets} />}
           {currentView === 'vibe' && <VibeCodingView />}
           {currentView === 'bootcamp' && <BootcampView currentUser={currentUser} />}
-          {currentView === 'github-wings' && <GitHubWingsView onBack={() => setCurrentView('forge')} />}
+          {currentView === 'github-wings' && <GitHubWingsView currentUser={currentUser} onBack={() => setCurrentView('forge')} onOpenView={setCurrentView} />}
           {currentView === 'snowflake-warrior' && <SnowflakeWarriorView onBack={() => setCurrentView('forge')} />}
+          {currentView === 'vscode-shipyard' && <VSCodeShipyardView currentUser={currentUser} onBack={() => setCurrentView('forge')} />}
           {currentView === 'progress' && <MyProgressView currentUser={currentUser} onOpenGuide={(route) => setCurrentView(route)} />}
         </main>
       </div>

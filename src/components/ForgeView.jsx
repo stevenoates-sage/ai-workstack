@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { LEARNING_GUIDES } from '../data/learningGuides';
 import { getAllGuideProgressForUser, setGuideProgress } from '../utils/progressStore';
 import GitHubWingsBadge from '../assets/Icons/GitHub Wings Badge.png';
 import SnowflakeWarriorBadge from '../assets/Icons/Snowflake Warrior.png';
 import ClaudeGladiatorBadge from '../assets/Icons/Claude Gladiator.png';
+import VSCodeShipyardBadge from '../assets/Icons/VS Code Shipyard Badge.png';
 
 const GITHUB_WINGS_ID = 'prereq-github-wings';
 const SNOWFLAKE_WARRIOR_ID = 'prereq-snowflake-warrior';
+const VSCODE_SHIPYARD_ID = 'prereq-vscode-shipyard';
 const VIBE_CODING_ID = 'vibe-coding-track';
 
 const formatDate = (value) => {
@@ -17,18 +19,24 @@ const formatDate = (value) => {
 };
 
 export default function ForgeView({ currentUser, onOpenView }) {
-  const [, setRefreshKey] = useState(0);
-  const guideProgress = getAllGuideProgressForUser(currentUser);
+  const [guideProgress, setGuideProgressState] = useState(() => getAllGuideProgressForUser(currentUser));
+
+  useEffect(() => {
+    setGuideProgressState(getAllGuideProgressForUser(currentUser));
+  }, [currentUser]);
+
   const bootcampGuide = LEARNING_GUIDES.find((guide) => guide.route === 'bootcamp');
 
   const githubWingsPercent = guideProgress[GITHUB_WINGS_ID]?.percent || 0;
   const snowflakeWarriorPercent = guideProgress[SNOWFLAKE_WARRIOR_ID]?.percent || 0;
+  const vscodeShipyardPercent = guideProgress[VSCODE_SHIPYARD_ID]?.percent || 0;
   const bootcampPercent = bootcampGuide ? guideProgress[bootcampGuide.id]?.percent || 0 : 0;
   const vibeCodingPercent = guideProgress[VIBE_CODING_ID]?.percent || 0;
   const bootcampUnlocked = githubWingsPercent >= 100;
 
   const githubWingsDate = guideProgress[GITHUB_WINGS_ID]?.updatedAt;
   const snowflakeWarriorDate = guideProgress[SNOWFLAKE_WARRIOR_ID]?.updatedAt;
+  const vscodeShipyardDate = guideProgress[VSCODE_SHIPYARD_ID]?.updatedAt;
   const claudeGladiatorDate = bootcampGuide ? guideProgress[bootcampGuide.id]?.updatedAt : null;
 
   const heroBadges = [
@@ -47,6 +55,13 @@ export default function ForgeView({ currentUser, onOpenView }) {
       updatedAt: snowflakeWarriorDate,
     },
     {
+      id: VSCODE_SHIPYARD_ID,
+      title: 'VS Code Shipyard',
+      image: VSCodeShipyardBadge,
+      percent: vscodeShipyardPercent,
+      updatedAt: vscodeShipyardDate,
+    },
+    {
       id: 'claude-gladiator',
       title: 'Claude Gladiator',
       image: ClaudeGladiatorBadge,
@@ -56,11 +71,22 @@ export default function ForgeView({ currentUser, onOpenView }) {
   ];
 
   const setPrereqStatus = (guideId, completed) => {
+    const nextProgress = {
+      ...(guideProgress || {}),
+      [guideId]: {
+        ...(guideProgress?.[guideId] || {}),
+        percent: completed ? 100 : 0,
+        completed,
+        updatedAt: new Date().toISOString(),
+      },
+    };
+
+    setGuideProgressState(nextProgress);
+
     setGuideProgress(currentUser, guideId, {
       percent: completed ? 100 : 0,
       completed,
     });
-    setRefreshKey((value) => value + 1);
   };
 
   return (
@@ -90,9 +116,9 @@ export default function ForgeView({ currentUser, onOpenView }) {
                     <button
                       onClick={() => setPrereqStatus(GITHUB_WINGS_ID, githubWingsPercent < 100)}
                       type="button"
-                      className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-amber-700"
+                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition ${githubWingsPercent >= 100 ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-amber-600 hover:bg-amber-700'}`}
                     >
-                      {githubWingsPercent >= 100 ? 'Mark incomplete' : 'Mark complete'}
+                      {githubWingsPercent >= 100 ? 'Completed ✓' : 'Mark complete'}
                     </button>
                   </div>
                 </div>
@@ -119,9 +145,9 @@ export default function ForgeView({ currentUser, onOpenView }) {
                     <button
                       onClick={() => setPrereqStatus(SNOWFLAKE_WARRIOR_ID, snowflakeWarriorPercent < 100)}
                       type="button"
-                      className="rounded-lg bg-slate-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-800"
+                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition ${snowflakeWarriorPercent >= 100 ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-700 hover:bg-slate-800'}`}
                     >
-                      {snowflakeWarriorPercent >= 100 ? 'Mark incomplete' : 'Mark complete'}
+                      {snowflakeWarriorPercent >= 100 ? 'Completed ✓' : 'Mark complete'}
                     </button>
                   </div>
                 </div>
@@ -129,6 +155,35 @@ export default function ForgeView({ currentUser, onOpenView }) {
                   <div className="h-2.5 rounded-full bg-slate-700" style={{ width: `${snowflakeWarriorPercent}%` }} />
                 </div>
                 <div className="mt-1 text-xs font-semibold text-gray-700 dark:text-gray-200">{snowflakeWarriorPercent}% complete</div>
+              </article>
+
+              <article className="rounded-2xl border border-amber-200 bg-white p-4 dark:border-amber-700/50 dark:bg-gray-800/60">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900 dark:text-white">VS Code Shipyard</div>
+                    <div className="mt-1 text-xs text-gray-600 dark:text-gray-300">Install and configure VS Code for your Sage development workflow.</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => onOpenView('vscode-shipyard')}
+                      type="button"
+                      className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700"
+                    >
+                      Open
+                    </button>
+                    <button
+                      onClick={() => setPrereqStatus(VSCODE_SHIPYARD_ID, vscodeShipyardPercent < 100)}
+                      type="button"
+                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition ${vscodeShipyardPercent >= 100 ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-cyan-700 hover:bg-cyan-800'}`}
+                    >
+                      {vscodeShipyardPercent >= 100 ? 'Completed ✓' : 'Mark complete'}
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-3 h-2.5 w-full rounded-full bg-cyan-100 dark:bg-cyan-900/40">
+                  <div className="h-2.5 rounded-full bg-cyan-700" style={{ width: `${vscodeShipyardPercent}%` }} />
+                </div>
+                <div className="mt-1 text-xs font-semibold text-cyan-800 dark:text-cyan-300">{vscodeShipyardPercent}% complete</div>
               </article>
             </div>
           </div>
@@ -182,7 +237,7 @@ export default function ForgeView({ currentUser, onOpenView }) {
 
         <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Hero Progress</h3>
-          <div className="mt-4 grid gap-4 md:grid-cols-3">
+          <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {heroBadges.map((badge) => {
               const achieved = badge.percent >= 100;
               return (
